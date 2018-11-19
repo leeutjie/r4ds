@@ -6,7 +6,7 @@ navbar:
   - text: "Home"
    href: index.html
   - text: "test"
-   href: .html
+   href: data_visualisation.html
 output:
   html_document:
  theme: jekyll-theme-hacker
