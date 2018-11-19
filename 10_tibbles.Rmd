@@ -1,13 +1,5 @@
 ---
 title: "Tibbles"
-knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
-  rmarkdown::render(input_file,
-                    encoding=encoding,
-                    output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
-author: "Louis Becker"
-date: "31 July 2018"
-output: html_document
 ---
 
 # Tibbles
@@ -16,6 +8,7 @@ AS stated earlier, __tibbles__ are effectively data frames, but are modified ver
 ### Creating Tibbles
 To coerce a `data frame` to a tibble:
 ```{r}
+library(tidyverse)
 as_tibble(iris)
 ```
 

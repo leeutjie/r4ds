@@ -1,12 +1,13 @@
-name: "Condensed R for Data Science"
+name: "Leeutjie"
 output_dir: "docs"
 navbar:
-  title: "Condensed R for Data Science"
+  title: "Leeutjie"
   left:
-  - text: "Home"
-   href: index.html
-  - text: "test"
-   href: data_visualisation.html
-output:
-  html_document:
- theme: jekyll-theme-hacker
+    - text: "R4DS"
+      menu: 
+        - text: "Data Visualisation"
+          href: 2_data_visualisation.html
+        - text: "Data Transformation"
+          href: 3_data_transformation.html
+        - text: "Tibbles"
+          href: 10_tibbles.html
