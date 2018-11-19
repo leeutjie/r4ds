@@ -1,0 +1,13 @@
+name: "Leeutjie"
+output_dir: "docs"
+navbar:
+  title: "Leeutjie"
+  left:
+    - text: "R4DS"
+      menu: 
+        - text: "Data Visualisation"
+          href: 2_data_visualisation.html
+        - text: "Data Transformation"
+          href: 3_data_transformation.html
+        - text: "Tibbles"
+          href: 10_tibbles.html
