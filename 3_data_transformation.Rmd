@@ -1,0 +1,369 @@
+---
+title: "Condensed R for Data Science Chapter 2: Data Transformation"
+author: "Louis Becker"
+date: "2018-07-16"
+output: html_document
+---
+
+This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through **R for Data Science**, available [here](http://r4ds.had.co.nz/index.html).
+
+First, we install/load the relevant packages by installing the *tidyverse*. This "package" effectively contains all packages developed by **the** Hadley Wickham:
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+library("tidyverse")
+```
+
+
+In this chapter we use an additional dataset that are installed in the form of packages...
+```{r message=FALSE, warning=FALSE}
+if (!require("nycflights13")) install.packages("nycflights13")
+library("nycflights13")
+```
+
+# Data Transformation
+
+In this chapter we will work primarily with the *dplyr* package, but we load the entire *tidyverse* anyway because it's easy. 
+
+The *dplyr* package works really well with a data object called a __tibble__. Essentially, a tibble is a nicely printable version of a [data frame](http://www.r-tutor.com/r-introduction/data-frame). Tibbles are data frames, but slightly tweaked to work better in the tidyverse. For now, you don’t need to worry about the differences; we’ll come back to tibbles in more detail in the Data Wrangle chapter.
+
+When viewing a `tibble`, these are the common data types in the columns you'll come across:
+
+* `int` – integers
+
+* `dbl` – doubles, or real numbers
+
+* `chr` – character vectors or strings
+
+* `dttm` – date-times
+
+* `lgl` – logicals/booleans -> TRUE or FALSE
+
+* `fctr` – factor: which R uses to represent categorical variables with fixed possible values
+
+* `date` – Dates
+
+When working with a `tibble` or a `data.frame` in **dplyr**, the following data data _verbs_ are most commonly used for wrangling data:
+
+* `filter()` – picking observations by their values
+
+* `arrange()` – order your table by rows
+
+* `select()` – pick variables by their names (by column)
+
+* `mutate()` – create new variables with functions based on existing variables
+
+* `summarise()` – collapse many variables down into a single summary
+
+* `group_by()` – this verb is used in conjunction with the above. It changes the scope of each function from operating on the entire dataset to operating on it group-by-group.
+
+
+### Filter()
+
+* `filter()` can take the following comparison operators: `>`, `>=`, `<`, `<=`, `!=` (not equal), and `==` (tests if equal to).
+
+* `filter()` can also accomodate logical operators:  `&` is “and”, `|` is “or”, `!` is “not” and `%in%` locates in a vector or concatenation. Sometimes you can simplify complicated subsetting by remembering De Morgan’s law: `!(x & y)` is the same as `!x | !y`, and `!(x | y)` is the same as `!x & !y`.
+
+* `filter()` also handles NA's. You can filter NA's with the `is.na()` function. 
+
+* `filter()` can also be used in conjunction with `between()` which is a shortcut for `x >=` left & `x <=` right, implemented efficiently in C++ for local values, and translated to the appropriate SQL syntax for remote tables.
+
+* `filter()` only includes rows where the condition is `TRUE`; it excludes both `FALSE` and `NA` values. If you want to preserve missing values, ask for them explicitly, as in the example below:
+
+```{r}
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+
+filter(df, is.na(x) | x > 1)
+```
+
+
+### Arrange()
+This orders the rows in a tibble. As more column names are provided, each additional column is used to break ties found in preceding columns. Use this verb in conjunction with `desc()` to sort in descending order. 
+
+
+### Select()
+
+`select()` allows you to rapidly zoom in on a useful subset using operations based on the names of the variables. Here are a few examples:
+
+```{r}
+# Select columns by name
+select(flights, year, month, day)
+# Select all columns between year and day (inclusive)
+select(flights, year:day)
+# Select all columns except those from year to day (inclusive)
+select(flights, -(year:day))
+```
+
+There are also a couple of helper functions that can be used within `select()`:
+
+* `starts_with("abc")` – matches names that begin with “abc”.
+
+* `ends_with("xyz")` –  matches names that end with “xyz”.
+
+* `contains("ijk")` –  matches names that contain “ijk”.
+
+* `matches("(.)\\1")` – selects variables that match a regular expression (more on this later). 
+
+* `num_range("x", 1:3)` – matches `x1`, `x2` and `x3`.
+
+
+### Mutate()
+
+`mutate()` always adds new columns at the end of your dataset. Here is an example with a thinner dataset:
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  speed = distance / air_time * 60
+)
+```
+
+Note that you can refer to columns that you’ve just created:
+```{r}
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+If you only want to keep the new variables, use `transmute()`:
+```{r}
+transmute(flights,
+  gain = dep_delay - arr_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+There are many functions for creating new variables that you can use with `mutate()`. There’s no way to list every possible function that you might use, but here’s a selection of functions that are frequently useful:
+
+* Arithmetic operators: `+`, `-`, `*`, `/`, `^`. These are also useful with aggregate functions like `x / sum(x)` or `y - mean(y)`.
+
+* Modular arithmetic: `%/%` (integer division) and `%%` (remainder), where `x == y * (x %/% y) + (x %% y)`. Modular arithmetic is a handy tool because it allows you to break integers up into pieces. For example, in the flights dataset, you can compute `hour` and `minute` from `dep_time` with:
+```{r}
+transmute(flights,
+  dep_time,
+  hour = dep_time %/% 100,
+  minute = dep_time %% 100
+)
+```
+
+* Logs: `log()`, `log2()`, `log10()`. These are useful transformations.
+
+* Offsets: `lead()` and `lag()` allow you to refer to leading or lagging values. This allows you to compute running differences (e.g. `x - lag(x)`) or find when values change (`x != lag(x)`). They are most useful in conjunction with `group_by()`.
+
+* Cumulative and rolling aggregates: From base R, the following functions run cumulative sums, products, mins and maxes respectively: `cumsum()`, `cumprod()`, `cummin()` and `cummax`. *dplyr* provides `cummean()`. Finally, the *RcppRoll* package can provide rolling aggregates. 
+
+* Logical comparisons: `<`, `<=`, `>`, `>=`, `!=`.
+
+* Ranking: Many types of ranking functions exist, but `min_rank()` and `desc()` are good ones to start with. See also  `row_number()`, `dense_rank()`, `percent_rank()`, `cume_dist()`, `ntile()`. 
+
+### Summarise()
+
+This data verb collapses a data frame into a single row. 
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+`summarise()` is not terribly useful unless we pair it with `group_by()`. Adding `group_by()` changes the unit of analysis from the complete dataset to individual groups. Here is an example where flights are grouped by day, and the average departure time is calculated. 
+
+```{r}
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+
+
+At this point it would be useful to read the short sections on [combining operations with the pipe operator](http://r4ds.had.co.nz/transform.html#combining-multiple-operations-with-the-pipe) and [missing values](http://r4ds.had.co.nz/transform.html#missing-values-1), also in this chapter. 
+
+The nice thing about `summarise()` is that you can add multiple summaries within the same function:
+
+```{r}
+flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>% 
+  filter(count > 20, dest != "HNL")
+```
+
+
+Whenever you do any aggregation, it’s always a good idea to include either a count `(n())`, or a count of non-missing values `(sum(!is.na(x)))`. This  way you can check that you’re not drawing conclusions based on very small amounts of data. Here is a quick example of what such an implementation would look like:
+
+```{r}
+
+# Remove missing values
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+# Create counts and summaries of the data (average dealy by tail number vs the count of tail numbers per average delay)
+delays <- 
+  not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+
+# Plot the summarised data
+ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
+  geom_point(alpha = 1/10)
+
+```
+
+Sometimes with these plots you want to subset the data to see if more of a pattern exists. The following snippet of code shows a nice way of integrating a chart into the piping functionality:
+
+```{r}
+delays %>% 
+  filter(n > 25) %>% 
+  ggplot(mapping = aes(x = n, y = delay)) + 
+    geom_point(alpha = 1/10)
+```
+
+#### Useful Summary Functions
+
+Just using means, counts, and sum can get you a long way, but R provides many other useful summary functions:
+
+* **Measures of location**: Along with `mean()`, `median()` is also useful. It’s sometimes useful to combine aggregation with logical subsetting:
+```{r}
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    avg_delay1 = mean(arr_delay),
+    avg_delay2 = mean(arr_delay[arr_delay > 0]) # the average positive delay
+  )
+```
+
+* **Measures of spread**: The root mean squared deviation, or standard deviation `sd()`, The interquartile range `IQR()` and median absolute deviation `mad(x)`
+
+* **Measures of rank:**: `min(x)`, `quantile(x, 0.25)`, `max(x)`. Quantiles are a generalisation of the median. For example, `quantile(x, 0.25)` will find a value of x that is greater than 25% of the values, and less than the remaining 75%.
+
+* *Measures of position*: `first(x)`, `nth(x, 2)`, `last(x)`. These work similarly to `x[1]`, `x[2]`, and `x[length(x)]` but let you set a default value if that position does not exist (i.e. you’re trying to get the 3rd element from a group that only has two elements). For example, we can find the first and last departure for each day:
+```{r}
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first_dep = first(dep_time), 
+    last_dep = last(dep_time)
+  )
+```
+
++ These functions are complementary to filtering on ranks. Filtering gives you all variables, with each observation in a separate row:
+```{r}
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    first_dep = first(dep_time), 
+    last_dep = last(dep_time)
+  )
+```
+
+* *Counts*: There is `n()`, which takes no arguments and returns the size of the current group. Use `sum(!is.na(x))` to count non-missing values and `n_distinct(x)` to count the number of unique values: 
+```{r}
+# Which destinations have the most carriers?
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(carriers = n_distinct(carrier)) %>% 
+  arrange(desc(carriers))
+```
+  
+  `dplyr`'s `count()` function is also extremely useful - it also does an automatic grouped count:
+```{r}
+not_cancelled %>% 
+  count(dest)
+```
+  
+  For this count function it is also possible to provide a weight variable. For example, you could use this to “count” (sum) the total number of miles a plane flew:
+```{r}
+not_cancelled %>% 
+  count(tailnum, wt = distance)
+```
+
+* *Counts and proportions of logical values*: `sum(x > 10)`,` mean(y == 0)`. When used with numeric functions, `TRUE` is converted to 1 and `FALSE` to 0. This makes `sum()` and `mean()` very useful: `sum(x)` gives the number of `TRUE`s in `x`, and `mean(x)` gives the proportion.
+
+```{r}
+# How many flights left before 5am? (these usually indicate delayed
+# flights from the previous day)
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(n_early = sum(dep_time < 500))
+```
+
+```{r}
+# What proportion of flights are delayed by more than an hour?
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(hour_perc = mean(arr_delay > 60))
+```
+
+
+#### Grouping by Multiple Variables
+When you group by multiple variables, each summary peels off one level of the grouping. That makes it easy to progressively roll up a dataset:
+
+```{r}
+daily <- group_by(flights, year, month, day)
+(per_day   <- summarise(daily, flights = n()))
+```
+
+```{r}
+(per_month <- summarise(per_day, flights = sum(flights)))
+```
+
+```{r}
+(per_year  <- summarise(per_month, flights = sum(flights)))
+```
+
+Be careful when progressively rolling up summaries: it’s OK for sums and counts, but you need to think about weighting means and variances, and it’s not possible to do it exactly for rank-based statistics like the median. In other words, the sum of groupwise sums is the overall sum, but the median of groupwise medians is not the overall median.
+
+
+#### Ungrouping
+
+If you need to remove grouping, and return to operations on ungrouped data, use `ungroup()`.
+
+```{r}
+daily %>% 
+  ungroup() %>%             # no longer grouped by date
+  summarise(flights = n())  # all flights
+```
+
+
+#### Grouped mutates (and filters)
+Grouping is most useful in conjunction with `summarise()`, but you can also do convenient operations with `mutate()` and `filter()`:
+
+* Find the worst members of each group:
+```{r}
+flights_sml %>% 
+  group_by(year, month, day) %>%
+  filter(rank(desc(arr_delay)) < 10)
+```
+
+* Find all groups bigger than a threshold:
+
+```{r}
+popular_dests <- flights %>% 
+  group_by(dest) %>% 
+  filter(n() > 365)
+popular_dests
+```
+
+* Standardise to compute per group metrics:
+
+```{r}
+popular_dests %>% 
+  filter(arr_delay > 0) %>% 
+  mutate(prop_delay = arr_delay / sum(arr_delay)) %>% 
+  select(year:day, dest, arr_delay, prop_delay)
+```
+
+
+Functions that work most naturally in grouped mutates and filters are known as window functions (vs. the summary functions used for summaries). You can learn more about useful window functions in the corresponding vignette: `vignette("window-functions")`.

@@ -1,0 +1,113 @@
+---
+title: "Tibbles"
+author: "Louis Becker"
+date: "31 July 2018"
+output: html_document
+---
+
+# Tibbles
+AS stated earlier, __tibbles__ are effectively data frames, but are modified versions to display better and have certain, more efficient, behaviours. 
+
+### Creating Tibbles
+To coerce a `data frame` to a tibble:
+```{r}
+as_tibble(iris)
+```
+
+To create a new tibble, use the following syntax:
+```{r}
+
+tibble(  
+  x = 1:5, 
+  y = 1, 
+  z = x ^ 2 + y)
+
+```
+
+Tibble columns can have non-syntactic names, for example:
+```{r}
+tb <- tibble(
+  `:)` = "smile", 
+  ` ` = "space",
+  `2000` = "number")
+tb
+```
+
+To revise, you can create/coerce a tibble with `as_tibble`, `tibble` and now also `tribble` — short for transposed tibble. The function is customised for data entry in code: column headings are defined by formulas (i.e. they start with `~`), and entries are separated by commas. You can literally layout the table you want, and `tribble` will coerce it for you. I often add a comment (the line starting with #), to make it really clear where the header is.
+```{r}
+tribble(
+  ~x, ~y, ~z,
+  #--|--|----
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+```
+
+### Tibble vs data.frame
+
+The two main differences between `data.frames` and `tibbles` are the way in which these objects print and how data can be subsetted within these structures. 
+
+#### Printing
+As opposed to a dataframe, a tibble prints the first ten rows of the set, shows data types and also shows the name of the tibble. It also gives a row count which is really helpful when working with big data sets. Here is an example that incorporates dates from `lubridate`, a package we will get to later.
+```{r}
+tibble(                                        # Some extra comments
+  a = lubridate::now() + runif(1e3) * 86400,   # lubrudate::now() gives a timestamp of right now; 1e3 for some reason calculates 1000
+  b = lubridate::today() + runif(1e3) * 30,    # lubridate::today() gives today's date; runi() yields a uniform distribution based on an input parameter. 
+  c = 1:1e3,
+  d = runif(1e3),
+  e = sample(letters, 1e3, replace = TRUE)     # letters yields a vector of lower case letters of the alphabet, sample() is a base function that samples rows from a vector
+)
+```
+
+
+By design, tibbles print succinctly so as not to overwhelm your console. Often, though, we need to see more than the six rows of data the default print gives us. Here are a few options for overriding the default printing parameters:
+
+1. You can `print()` the data frame and control the number of rows `(n)` and `width` of the display. `width = Inf`, for instance, will display all the columns:
+
+```{r}
+nycflights13::flights %>% 
+  print(n = 10, width = Inf) # Inf is short for infinite
+```
+
+2. You can control the default print by setting options:
+    + `options(tibble.print_max = n, tibble.print_min = m)`: if more than m rows, print only n rows. Use `options(dplyr.print_min = Inf)` to always show all rows.
+    + Use `options(tibble.width = Inf)` to always print all columns, regardless of the width of the screen.
+    + You can see a complete list of options by looking at the package help with `package?tibble`.
+3. Another option I use often is the `View()` command, which generates a scrollable view of the complete dataset. This is often useful at the end of a long data manipulation. 
+
+#### Subsetting
+R works with the following subsetting tools:
+
+* `$` extracts by name only, but is easier to type
+* `[[` extracts by name or position
+
+Here are some examples:
+```{r}
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5) # Creates a random normal distribution
+)
+
+# To extract by name:
+df$x
+# or
+df[["x"]]
+
+# These operations also work in a pipe format:
+df %>% .$x  # The '.' simply refers to the output from the preceding function. 
+df %>% .[["x"]]
+
+```
+
+Compared to a `data.frame`, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.
+
+
+
+
+
+
+
+
+
+
+
