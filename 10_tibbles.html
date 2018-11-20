@@ -295,18 +295,18 @@ tb</code></pre>
   e = sample(letters, 1e3, replace = TRUE)     # letters yields a vector of lower case letters of the alphabet, sample() is a base function that samples rows from a vector
 )</code></pre>
 <pre><code>## # A tibble: 1,000 x 5
-##    a                   b              c       d e    
-##    &lt;dttm&gt;              &lt;date&gt;     &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;
-##  1 2018-11-20 17:15:11 2018-12-07     1 0.469   p    
-##  2 2018-11-20 19:33:40 2018-12-03     2 0.305   y    
-##  3 2018-11-20 17:31:52 2018-12-08     3 0.959   u    
-##  4 2018-11-20 18:26:48 2018-12-10     4 0.0589  d    
-##  5 2018-11-21 08:45:25 2018-11-22     5 0.128   e    
-##  6 2018-11-21 01:53:26 2018-12-16     6 0.00131 i    
-##  7 2018-11-20 12:59:51 2018-12-03     7 0.387   g    
-##  8 2018-11-21 07:44:10 2018-11-20     8 0.276   s    
-##  9 2018-11-20 22:55:31 2018-11-27     9 0.0848  g    
-## 10 2018-11-21 04:51:47 2018-12-16    10 0.303   c    
+##    a                   b              c     d e    
+##    &lt;dttm&gt;              &lt;date&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
+##  1 2018-11-20 22:14:42 2018-11-22     1 0.689 z    
+##  2 2018-11-21 10:37:23 2018-11-20     2 0.571 o    
+##  3 2018-11-21 02:50:33 2018-11-23     3 0.153 k    
+##  4 2018-11-21 03:43:08 2018-12-07     4 0.678 b    
+##  5 2018-11-21 10:08:53 2018-12-10     5 0.494 e    
+##  6 2018-11-20 19:51:09 2018-11-22     6 0.716 h    
+##  7 2018-11-21 07:46:00 2018-11-22     7 0.528 m    
+##  8 2018-11-21 00:12:49 2018-11-21     8 0.139 b    
+##  9 2018-11-21 02:05:29 2018-12-12     9 0.565 k    
+## 10 2018-11-21 08:33:15 2018-11-24    10 0.520 s    
 ## # ... with 990 more rows</code></pre>
 <p>By design, tibbles print succinctly so as not to overwhelm your console. Often, though, we need to see more than the six rows of data the default print gives us. Here are a few options for overriding the default printing parameters:</p>
 <ol style="list-style-type: decimal">
@@ -377,15 +377,15 @@ tb</code></pre>
 
 # To extract by name:
 df$x</code></pre>
-<pre><code>## [1] 0.6146303 0.1252503 0.8088654 0.9783253 0.2487020</code></pre>
+<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
 <pre class="r"><code># or
 df[[&quot;x&quot;]]</code></pre>
-<pre><code>## [1] 0.6146303 0.1252503 0.8088654 0.9783253 0.2487020</code></pre>
+<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
 <pre class="r"><code># These operations also work in a pipe format:
 df %&gt;% .$x  # The &#39;.&#39; simply refers to the output from the preceding function. </code></pre>
-<pre><code>## [1] 0.6146303 0.1252503 0.8088654 0.9783253 0.2487020</code></pre>
+<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
 <pre class="r"><code>df %&gt;% .[[&quot;x&quot;]]</code></pre>
-<pre><code>## [1] 0.6146303 0.1252503 0.8088654 0.9783253 0.2487020</code></pre>
+<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
 <p>Compared to a <code>data.frame</code>, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.</p>
 </div>
 </div>
