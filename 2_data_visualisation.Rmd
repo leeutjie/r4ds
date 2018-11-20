@@ -1,5 +1,5 @@
 ---
-title: "Condensed R for Data Science Chapter 2: Data Visualisation"
+title: "Data Visualisation"
 ---
 
 This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through **R for Data Science** available [here](http://r4ds.had.co.nz/index.html)
