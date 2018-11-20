@@ -1,13 +1,5 @@
 ---
-title: "Condensed R for Data Science Chapter 2: Data Transformation"
-knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
-  rmarkdown::render(input_file,
-                    encoding=encoding,
-                    output_file=file.path(dirname(input_file), out_dir, 'Data Transformation.html'))})
-author: "Louis Becker"
-date: "2018-07-16"
-output: html_document
+title: "Data Transformation"
 ---
 
 This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through **R for Data Science**, available [here](http://r4ds.had.co.nz/index.html).
