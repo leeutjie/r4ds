@@ -1,7 +1,7 @@
-name: "Leeutjie"
-output_dir: "."
+name: "My R4DS"
+output_dir: "docs"
 navbar:
-  title: "Leeutjie"
+  title: "Condensed R4DS"
   left:
     - text: "R4DS"
       menu: 

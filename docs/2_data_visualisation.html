@@ -176,7 +176,7 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Leeutjie</a>
+      <a class="navbar-brand" href="index.html">Condensed R4DS</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -215,26 +215,25 @@ $(document).ready(function () {
 </div>
 
 
-<p>This markdown is part of a series that serves as a condensed help guide that I use to explore R and the <em>tidyverse</em> packages as I work through <strong>R for Data Science</strong> available <a href="http://r4ds.had.co.nz/index.html">here</a></p>
-<p>First, we install/load the relevant packages by installing the <em>tidyverse</em>. This “package” effectively contains all packages developed by the Hadley Wickham:</p>
+<p>This markdown is part of a series that serves as a condensed help guide that I use to explore R and the <em>tidyverse</em> packages as I work through <a href="http://r4ds.had.co.nz/index.html">R for Data Science</a>.</p>
+<p>First, we install/load the relevant packages by installing the <a href="https://www.tidyverse.org/">tidyverse</a> library. This “package” effectively contains all packages developed by <em>the</em> Hadley Wickham that relate to the <a href="https://www.jstatsoft.org/article/view/v059i10">tidy</a> way of thinking. This chapter focuses mainly on the <code>ggplot2</code> library, but we load the whole <code>tidyverse</code> anyway:</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
 <div id="data-visualisation" class="section level1">
 <h1>Data Visualisation</h1>
-<p>In this chapter we will work with the <em>ggplot2</em> package, but I’m lazy so I just load the entire <em>tidyverse</em>.</p>
 <p>We start with some scatter plots of the <em>mpg</em> dataset, <strong>Scatter 1</strong>.</p>
 <pre class="r"><code>ggplot(mpg) + geom_point(aes(displ, hwy)) + ggtitle(&quot;Scatter 1&quot;)</code></pre>
 <p><img src="2_data_visualisation_files/figure-html/scatter1-1.png" width="672" /></p>
-<p>We could (and often should) be explicit about which parameters we are assigning variables to. Notice the <em>mapping</em>, <em>x</em> and <em>y</em> parameters that have been inserted into the code used to generate the previous graph.</p>
+<p>We could (and often should) be explicit about which parameters we are assigning variables to. Notice the <em>mapping</em>, <em>x</em> and <em>y</em> parameters that have been inserted into the code used to generate the previous graph:</p>
 <p><code>ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + ggtitle(&quot;Scatter 1&quot;)</code></p>
-<p>The function <em>ggplot()</em> creates an empty graph off the underlying data set. The <em>geom_</em> functions then add a layer to that.</p>
+<p>The function <code>ggplot()</code> creates an empty graph off the underlying data set. The <code>geom_</code> functions then add a layers on top of this object.</p>
 <pre class="r"><code># Practice
 ggplot(mpg) + geom_point(aes(y = hwy, x = cyl)) + ggtitle(&quot;Scatter 2&quot;)</code></pre>
-<p><img src="2_data_visualisation_files/figure-html/sctter2-1.png" width="672" /></p>
+<p><img src="2_data_visualisation_files/figure-html/scatter2-1.png" width="672" /></p>
 <p>Here is another example:</p>
 <pre class="r"><code>ggplot(mpg) + geom_point(aes(y = class, x = drv)) + ggtitle(&quot;Scatter 3&quot;)</code></pre>
 <p><img src="2_data_visualisation_files/figure-html/scatter3-1.png" width="672" /></p>
 <p>By the way, <strong>Scatter 3</strong> is not a useful plot because the variables shown here cannot have a linear relationship.</p>
-<p>An epic feature of <em>ggplot2</em> is that it Can add a third variable to a 2D plot by mapping this variable to an aesthetic â€“ the visual property of the objects in my plot(size, shape, colour of points). This is described as the level. We can use color, size, shape and alpha (transparency) in the <em>aesthetic</em> function to indicate the third variable! This is known as scaling. In essence, just map the aesthetic and ggplot does the rest.</p>
+<p>An epic feature of the <code>ggplot2</code> package is that it Can add a third variable to a 2D plot by mapping this variable to an aesthetic, which is the visual property of the objects in my plot (size, shape, colour of points). This is described as the level. We can use the color, size, shape and alpha (transparency) arguments in the <code>aesthetic</code> function to portray the third variable! This is known as scaling. In essence, we just map the aesthetic and ggplot does the rest:</p>
 <pre class="r"><code>ggplot(mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = class)) + ggtitle(&quot;Scatter 4&quot;)</code></pre>
 <p><img src="2_data_visualisation_files/figure-html/scatter4-1.png" width="672" /></p>
 <div id="aesthetic-mapping-exercises" class="section level2">
@@ -518,14 +517,8 @@ ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
 <div id="coord_quickmap" class="section level3">
 <h3>Coord_quickmap()</h3>
 <p><code>coord_quickmap()</code> sets the aspect ratio correctly for maps. This is very important if youâ€™re plotting spatial data with ggplot2.</p>
-<pre class="r"><code>if (!require(&quot;maps&quot;)) install.packages(&quot;maps&quot;)</code></pre>
-<pre><code>## Loading required package: maps</code></pre>
-<pre><code>## 
-## Attaching package: &#39;maps&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:purrr&#39;:
-## 
-##     map</code></pre>
-<pre class="r"><code>library(maps)
+<pre class="r"><code>if (!require(&quot;maps&quot;)) install.packages(&quot;maps&quot;)
+library(maps)
 
 nz &lt;- map_data(&quot;nz&quot;)
 

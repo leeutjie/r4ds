@@ -176,7 +176,7 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Leeutjie</a>
+      <a class="navbar-brand" href="index.html">Condensed R4DS</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -221,16 +221,8 @@ $(document).ready(function () {
 <div id="creating-tibbles" class="section level3">
 <h3>Creating Tibbles</h3>
 <p>To coerce a <code>data frame</code> to a tibble:</p>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v ggplot2 3.0.0     v purrr   0.2.5
-## v tibble  1.4.2     v dplyr   0.7.6
-## v tidyr   0.8.1     v stringr 1.3.1
-## v readr   1.1.1     v forcats 0.3.0</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>as_tibble(iris)</code></pre>
+<pre class="r"><code>library(tidyverse)
+as_tibble(iris)</code></pre>
 <pre><code>## # A tibble: 150 x 5
 ##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
 ##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;  
@@ -295,18 +287,18 @@ tb</code></pre>
   e = sample(letters, 1e3, replace = TRUE)     # letters yields a vector of lower case letters of the alphabet, sample() is a base function that samples rows from a vector
 )</code></pre>
 <pre><code>## # A tibble: 1,000 x 5
-##    a                   b              c     d e    
-##    &lt;dttm&gt;              &lt;date&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;
-##  1 2018-11-20 22:14:42 2018-11-22     1 0.689 z    
-##  2 2018-11-21 10:37:23 2018-11-20     2 0.571 o    
-##  3 2018-11-21 02:50:33 2018-11-23     3 0.153 k    
-##  4 2018-11-21 03:43:08 2018-12-07     4 0.678 b    
-##  5 2018-11-21 10:08:53 2018-12-10     5 0.494 e    
-##  6 2018-11-20 19:51:09 2018-11-22     6 0.716 h    
-##  7 2018-11-21 07:46:00 2018-11-22     7 0.528 m    
-##  8 2018-11-21 00:12:49 2018-11-21     8 0.139 b    
-##  9 2018-11-21 02:05:29 2018-12-12     9 0.565 k    
-## 10 2018-11-21 08:33:15 2018-11-24    10 0.520 s    
+##    a                   b              c      d e    
+##    &lt;dttm&gt;              &lt;date&gt;     &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;
+##  1 2018-11-21 15:21:04 2018-11-29     1 0.818  x    
+##  2 2018-11-22 02:25:34 2018-11-26     2 0.297  x    
+##  3 2018-11-21 17:15:12 2018-12-04     3 0.956  s    
+##  4 2018-11-21 22:13:03 2018-11-24     4 0.801  m    
+##  5 2018-11-22 09:14:30 2018-12-02     5 0.349  v    
+##  6 2018-11-21 11:50:37 2018-12-17     6 0.166  g    
+##  7 2018-11-22 02:31:25 2018-12-07     7 0.928  o    
+##  8 2018-11-22 05:10:51 2018-12-20     8 0.469  m    
+##  9 2018-11-22 03:32:54 2018-11-26     9 0.0762 y    
+## 10 2018-11-21 18:03:35 2018-12-12    10 0.0589 d    
 ## # ... with 990 more rows</code></pre>
 <p>By design, tibbles print succinctly so as not to overwhelm your console. Often, though, we need to see more than the six rows of data the default print gives us. Here are a few options for overriding the default printing parameters:</p>
 <ol style="list-style-type: decimal">
@@ -377,15 +369,15 @@ tb</code></pre>
 
 # To extract by name:
 df$x</code></pre>
-<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
+<pre><code>## [1] 0.43769430 0.01982998 0.19113665 0.30440999 0.55153170</code></pre>
 <pre class="r"><code># or
 df[[&quot;x&quot;]]</code></pre>
-<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
+<pre><code>## [1] 0.43769430 0.01982998 0.19113665 0.30440999 0.55153170</code></pre>
 <pre class="r"><code># These operations also work in a pipe format:
 df %&gt;% .$x  # The &#39;.&#39; simply refers to the output from the preceding function. </code></pre>
-<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
+<pre><code>## [1] 0.43769430 0.01982998 0.19113665 0.30440999 0.55153170</code></pre>
 <pre class="r"><code>df %&gt;% .[[&quot;x&quot;]]</code></pre>
-<pre><code>## [1] 0.151072547 0.005123376 0.804279087 0.558417541 0.516158950</code></pre>
+<pre><code>## [1] 0.43769430 0.01982998 0.19113665 0.30440999 0.55153170</code></pre>
 <p>Compared to a <code>data.frame</code>, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.</p>
 </div>
 </div>

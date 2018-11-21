@@ -2,49 +2,51 @@
 title: "Data Visualisation"
 ---
 
-This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through **R for Data Science** available [here](http://r4ds.had.co.nz/index.html)
+This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through [R for Data Science](http://r4ds.had.co.nz/index.html).
 
-First, we install/load the relevant packages by installing the *tidyverse*. This "package" effectively contains all packages developed by the Hadley Wickham:
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* Hadley Wickham that relate to the [tidy](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses mainly on the `ggplot2` library, but we load the whole `tidyverse` anyway:
+
 ```{r load}
 library("tidyverse")
 ```
 
-# Data Visualisation
 
-In this chapter we will work with the *ggplot2* package, but I'm lazy so I just load the entire *tidyverse*.
+# Data Visualisation
 
 We start with some scatter plots of the *mpg* dataset, **Scatter 1**.
 ```{r scatter1}
 ggplot(mpg) + geom_point(aes(displ, hwy)) + ggtitle("Scatter 1")
 ```
 
-We could (and often should) be explicit about which parameters we are assigning variables to. Notice the *mapping*, *x* and *y* parameters that have been inserted into the code used to generate the previous graph. 
+We could (and often should) be explicit about which parameters we are assigning variables to. Notice the *mapping*, *x* and *y* parameters that have been inserted into the code used to generate the previous graph:
 
 `ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + ggtitle("Scatter 1")`
 
+The function `ggplot()` creates an empty graph off the underlying data set. The `geom_` functions then add a layers on top of this object. 
 
-The function *ggplot()* creates an empty graph off the underlying data set. The *geom_* functions then add a layer to that. 
-
-```{r sctter2}
+```{r scatter2}
 # Practice
 ggplot(mpg) + geom_point(aes(y = hwy, x = cyl)) + ggtitle("Scatter 2")
 
 ```
 
 Here is another example:
+
 ```{r scatter3}
 ggplot(mpg) + geom_point(aes(y = class, x = drv)) + ggtitle("Scatter 3")
 ```
 
 By the way, **Scatter 3** is not a useful plot because the variables shown here cannot have a linear relationship. 
 
-An epic feature of *ggplot2* is that it Can add a third variable to a 2D plot by mapping this variable to an aesthetic – the visual property of the objects in my plot(size, shape, colour of points). This is described as the level. We can use color, size, shape and alpha (transparency) in the *aesthetic* function to indicate the third variable! This is known as scaling. In essence, just map the aesthetic and ggplot does the rest.
+An epic feature of the `ggplot2` package is that it Can add a third variable to a 2D plot by mapping this variable to an aesthetic, which is the visual property of the objects in my plot (size, shape, colour of points). This is described as the level. We can use the color, size, shape and alpha (transparency) arguments in the `aesthetic` function to portray the third variable! This is known as scaling. In essence, we just map the aesthetic and ggplot does the rest:
+
 ```{r scatter4}
 ggplot(mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = class)) + ggtitle("Scatter 4")
 ```
 
 
 ## Aesthetic mapping Exercises
+
 ```{r problem}
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
