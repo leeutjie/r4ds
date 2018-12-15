@@ -1,60 +1,72 @@
 ---
-title: "Data Transformation"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
 ---
 
-This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through **R for Data Science**, available [here](http://r4ds.had.co.nz/index.html).
+<br>
 
-First, we install/load the relevant packages by installing the *tidyverse*. This "package" effectively contains all packages developed by **the** Hadley Wickham:
-```{r load}
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load, message=FALSE, warning=FALSE}
+
 if (!require("tidyverse")) install.packages("tidyverse")
 library("tidyverse")
+
 ```
 
 
-In this chapter we use an additional dataset that are installed in the form of packages...
-```{r message=FALSE, warning=FALSE}
+In this chapter we also use an additional dataset that can be installed in the form of packages:
+
+```{r data, message=FALSE, warning=FALSE}
+
 if (!require("nycflights13")) install.packages("nycflights13")
 library("nycflights13")
+
 ```
 
-# Data Transformation
 
-In this chapter we will work primarily with the *dplyr* package, but we load the entire *tidyverse* anyway because it's easy. 
+# Data Transformation
 
 The *dplyr* package works really well with a data object called a __tibble__. Essentially, a tibble is a nicely printable version of a [data frame](http://www.r-tutor.com/r-introduction/data-frame). Tibbles are data frames, but slightly tweaked to work better in the tidyverse. For now, you don’t need to worry about the differences; we’ll come back to tibbles in more detail in the Data Wrangle chapter.
 
 When viewing a `tibble`, these are the common data types in the columns you'll come across:
 
-* `int` – integers
+* `int` - integers
 
-* `dbl` – doubles, or real numbers
+* `dbl` - doubles, or real numbers
 
-* `chr` – character vectors or strings
+* `chr` - character vectors or strings
 
-* `dttm` – date-times
+* `dttm` - date-times
 
-* `lgl` – logicals/booleans -> TRUE or FALSE
+* `lgl` - logicals/booleans -> TRUE or FALSE
 
-* `fctr` – factor: which R uses to represent categorical variables with fixed possible values
+* `fctr` - factor: which R uses to represent categorical variables with fixed possible values
 
-* `date` – Dates
+* `date` - Dates
+
 
 When working with a `tibble` or a `data.frame` in **dplyr**, the following data data _verbs_ are most commonly used for wrangling data:
 
-* `filter()` – picking observations by their values
+* `filter()` - picking observations by their values
 
-* `arrange()` – order your table by rows
+* `arrange()` - order your table by rows
 
-* `select()` – pick variables by their names (by column)
+* `select()` - pick variables by their names (by column)
 
-* `mutate()` – create new variables with functions based on existing variables
+* `mutate()` - create new variables with functions based on existing variables
 
-* `summarise()` – collapse many variables down into a single summary
+* `summarise()` - collapse many variables down into a single summary
 
-* `group_by()` – this verb is used in conjunction with the above. It changes the scope of each function from operating on the entire dataset to operating on it group-by-group.
+* `group_by()` - this verb is used in conjunction with the above. It changes the scope of each function from operating on the entire dataset to operating on it group-by-group.
 
 
-### Filter()
+## Filter()
 
 * `filter()` can take the following comparison operators: `>`, `>=`, `<`, `<=`, `!=` (not equal), and `==` (tests if equal to).
 
@@ -67,44 +79,51 @@ When working with a `tibble` or a `data.frame` in **dplyr**, the following data 
 * `filter()` only includes rows where the condition is `TRUE`; it excludes both `FALSE` and `NA` values. If you want to preserve missing values, ask for them explicitly, as in the example below:
 
 ```{r}
+
 df <- tibble(x = c(1, NA, 3))
 filter(df, x > 1)
 
 filter(df, is.na(x) | x > 1)
+
 ```
 
 
-### Arrange()
+## Arrange()
+
 This orders the rows in a tibble. As more column names are provided, each additional column is used to break ties found in preceding columns. Use this verb in conjunction with `desc()` to sort in descending order. 
 
 
-### Select()
+## Select()
 
 `select()` allows you to rapidly zoom in on a useful subset using operations based on the names of the variables. Here are a few examples:
 
 ```{r}
+
 # Select columns by name
 select(flights, year, month, day)
+
 # Select all columns between year and day (inclusive)
 select(flights, year:day)
+
 # Select all columns except those from year to day (inclusive)
 select(flights, -(year:day))
+
 ```
 
 There are also a couple of helper functions that can be used within `select()`:
 
-* `starts_with("abc")` – matches names that begin with “abc”.
+* `starts_with("abc")` - matches names that begin with “abc”.
 
-* `ends_with("xyz")` –  matches names that end with “xyz”.
+* `ends_with("xyz")` -  matches names that end with “xyz”.
 
-* `contains("ijk")` –  matches names that contain “ijk”.
+* `contains("ijk")` -  matches names that contain “ijk”.
 
-* `matches("(.)\\1")` – selects variables that match a regular expression (more on this later). 
+* `matches("(.)\\1")` - selects variables that match a regular expression (more on this later). 
 
-* `num_range("x", 1:3)` – matches `x1`, `x2` and `x3`.
+* `num_range("x", 1:3)` - matches `x1`, `x2` and `x3`.
 
 
-### Mutate()
+## Mutate()
 
 `mutate()` always adds new columns at the end of your dataset. Here is an example with a thinner dataset:
 
@@ -163,7 +182,7 @@ transmute(flights,
 
 * Ranking: Many types of ranking functions exist, but `min_rank()` and `desc()` are good ones to start with. See also  `row_number()`, `dense_rank()`, `percent_rank()`, `cume_dist()`, `ntile()`. 
 
-### Summarise()
+## Summarise()
 
 This data verb collapses a data frame into a single row. 
 ```{r}
@@ -227,7 +246,7 @@ delays %>%
     geom_point(alpha = 1/10)
 ```
 
-#### Useful Summary Functions
+### Useful Summary Functions
 
 Just using means, counts, and sum can get you a long way, but R provides many other useful summary functions:
 
@@ -304,7 +323,7 @@ not_cancelled %>%
 ```
 
 
-#### Grouping by Multiple Variables
+### Grouping by Multiple Variables
 When you group by multiple variables, each summary peels off one level of the grouping. That makes it easy to progressively roll up a dataset:
 
 ```{r}
@@ -323,7 +342,7 @@ daily <- group_by(flights, year, month, day)
 Be careful when progressively rolling up summaries: it’s OK for sums and counts, but you need to think about weighting means and variances, and it’s not possible to do it exactly for rank-based statistics like the median. In other words, the sum of groupwise sums is the overall sum, but the median of groupwise medians is not the overall median.
 
 
-#### Ungrouping
+### Ungrouping
 
 If you need to remove grouping, and return to operations on ungrouped data, use `ungroup()`.
 
@@ -334,7 +353,7 @@ daily %>%
 ```
 
 
-#### Grouped mutates (and filters)
+### Grouped mutates (and filters)
 Grouping is most useful in conjunction with `summarise()`, but you can also do convenient operations with `mutate()` and `filter()`:
 
 * Find the worst members of each group:

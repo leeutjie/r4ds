@@ -1,9 +1,0 @@
----
-title: "Welcome to my expermental website..."
----
-
-```{r, echo = FALSE, out.width = "100%"}
-library(knitr)
-include_graphics("lion-black-and-white-1920x1080.jpg")
-
-```

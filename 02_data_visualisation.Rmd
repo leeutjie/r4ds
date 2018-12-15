@@ -1,88 +1,125 @@
 ---
-title: "Data Visualisation"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
 ---
 
-This markdown is part of a series that serves as a condensed help guide that I use to explore R and the *tidyverse* packages as I work through [R for Data Science](http://r4ds.had.co.nz/index.html).
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
 
-First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* Hadley Wickham that relate to the [tidy](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses mainly on the `ggplot2` library, but we load the whole `tidyverse` anyway:
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
 
 ```{r load}
+
+if (!require("tidyverse")) install.packages("tidyverse")
 library("tidyverse")
+
 ```
 
 
 # Data Visualisation
 
 We start with some scatter plots of the *mpg* dataset, **Scatter 1**.
+
 ```{r scatter1}
-ggplot(mpg) + geom_point(aes(displ, hwy)) + ggtitle("Scatter 1")
+
+ggplot(mpg) + 
+  geom_point(aes(displ, hwy)) + 
+  ggtitle("Scatter 1")
+
 ```
+
 
 We could (and often should) be explicit about which parameters we are assigning variables to. Notice the *mapping*, *x* and *y* parameters that have been inserted into the code used to generate the previous graph:
 
-`ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + ggtitle("Scatter 1")`
+```{r parameters, message=FALSE, warning=FALSE}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  ggtitle("Scatter 1")
+
+```
+
 
 The function `ggplot()` creates an empty graph off the underlying data set. The `geom_` functions then add a layers on top of this object. 
 
 ```{r scatter2}
+
 # Practice
-ggplot(mpg) + geom_point(aes(y = hwy, x = cyl)) + ggtitle("Scatter 2")
+ggplot(mpg) + 
+  geom_point(aes(y = hwy, x = cyl)) + 
+  ggtitle("Scatter 2")
 
 ```
+
 
 Here is another example:
 
 ```{r scatter3}
-ggplot(mpg) + geom_point(aes(y = class, x = drv)) + ggtitle("Scatter 3")
+
+ggplot(mpg) + 
+  geom_point(aes(y = class, x = drv)) + 
+  ggtitle("Scatter 3")
+
 ```
 
-By the way, **Scatter 3** is not a useful plot because the variables shown here cannot have a linear relationship. 
 
-An epic feature of the `ggplot2` package is that it Can add a third variable to a 2D plot by mapping this variable to an aesthetic, which is the visual property of the objects in my plot (size, shape, colour of points). This is described as the level. We can use the color, size, shape and alpha (transparency) arguments in the `aesthetic` function to portray the third variable! This is known as scaling. In essence, we just map the aesthetic and ggplot does the rest:
+**Scatter 3** is not a useful plot because the variables shown here cannot have a linear relationship. 
+
+An epic feature of the `ggplot2` package is that it Can add a third variable to a two-dimensional plot by mapping this variable to an aesthetic, which is the visual property of the objects in my plot (size, shape, colour of points). This is described as the level. We can use the colour, size, shape and alpha (transparency) arguments in the `aesthetic` function to portray the third variable! This is known as scaling. In essence, we just map the aesthetic and ggplot does the rest:
 
 ```{r scatter4}
-ggplot(mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = class)) + ggtitle("Scatter 4")
+
+ggplot(mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
+  ggtitle("Scatter 4")
+
 ```
 
-
-## Aesthetic mapping Exercises
-
-```{r problem}
-ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
-```
-
-In the above example, the dots are red despite the *color = "blue"* specification because it is specified **inside** the `aes()` field. Setting the colour and other such parameters uniformly should be outside this mapping field in the *layer* field. 
 
 Possible aesthetics:
 
 * alpha (transparency)
 * colour
-* fill (the fill arsthetic can also be used in a variable capacity to show different colours for different observations)
-* group (use categorical variable here. It can replace color, and groups objects on the plot. See further down.)
+* fill (this aesthetic can also be used in a variable capacity to show different colours for different observations)
+* group (use categorical variable here. It can replace color, and groups objects on the plot. See further down)
 * shape
 * size
 * stroke (understand a little)
 
 You can also map subject to certain constraints e.g. 
+
 ```{r}
+
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, color = cyl < 6))
+
 ```
 
 This will show which of the observations adhere to a particular condition or not. 
 
+
 ## Facets
-One way to add additional variables is with aesthetics. Another way, particularly useful for categorical variables, is to split your plot into **facets**, subplots that each display one subset of the data.
+
+One way to add additional variables is with aesthetics. Another way, which is particularly useful for categorical variables, is to split your plot into **facets** or subplots that each display one subset of the data.
 
 ```{r facet}
+
 ggplot(mpg) +
   geom_point(aes(x = cyl, y = hwy, col = trans)) +
   facet_wrap(~ class, nrow = 3)
 
 ```
 
-Note: "The first argument of facet_wrap() should be a formula, which you create with ~ followed by a variable name (here “formula” is the name of a data structure in R, not a synonym for “equation”). The variable that you pass to facet_wrap() should be discrete."  
+Note: "The first argument of facet_wrap() should be a formula, which you create with `~` followed by a variable name (here “formula” refers to the name of a data structure in R. It not a synonym for “equation”). The variable that you pass `to facet_wrap()` should be discrete."  
 
 Facets can be done for two variables. To do this, add `facet_grid()` to the plot call. The first argument of this mapping is also a formula. 
 
@@ -94,52 +131,72 @@ ggplot(mpg) +
 
 ```
 
-To facet with just one variable, use a "." At the other end of the formula. 
+To facet with just one variable, use a "." at the other end of the formula. 
+
 
 ## Geoms
+
 "A geom is the geometrical object that a plot uses to represent data. People often describe plots by the type of geom that the plot uses." 
 
 We can turn this... 
 ```{r point_geom}
+
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy))
 
 ```
 
+
 ...into this...
+
 ```{r}
+
 ggplot(data = mpg) + 
   geom_smooth(mapping = aes(x = displ, y = hwy))
 
 # Loess regression is the default
+
 ```
 
+
 ...by changing the *geom*. Every *geom* takes a mapping argument, but not every `aes()` works with every *geom*. For example, with line types:
+
 ```{r}
+
 ggplot(data = mpg) + 
   geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+
 ```
+
 
 Many geoms use a single geometric object to display multiple rows of data. For these geoms, you can set the group aesthetic to a categorical variable to draw multiple objects (or use color, as previously mentioned).
 
 We can plot multiple *geoms* for the same data and layer them over each other. This, however, causes repetition in the code. If, for example, the axes change, every geom's *x* and *y* specs would have to change. 
-```{r multi layers}
+
+```{r multi_layers}
+
 ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy)) +
   geom_smooth(mapping = aes(x = displ, y = hwy))
+
 ```
 
+
 In the case of layering different geoms, we can specify parameters like the axes as global options in the *ggplot* chart object: 
+
 ```{r global}
 
 ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
   geom_point() +
   geom_smooth()
 
- # Same data passed to different geoms.  
+ # Same data passed to different geoms. 
+
 ```
 
+
 Epicly enough, we can still add features to each *geom* that will affect that layer only. For example, notice the colour in the following:
+
 ```{r layering}
 
 ggplot(mpg, aes(x = displ, y = hwy)) +
@@ -148,66 +205,36 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 
 ```
 
+
 I can also subset the data in a particular *geom* with `filter()` from the *dplyr* package. 
 
 ```{r}
+
 ggplot(mpg, aes(x = displ, y = hwy)) + 
   geom_point(aes(color = class)) +
   geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
 
 # se = TRUE/FALSE displays confidence interval around the geom_smooth line or not. 
-```
-
-
-## Geom Exercises
-
-Here I write code to recreate the graphs given in the book. 
-```{r recreate}
-# Plot 1
-ggplot(mpg, aes(displ, hwy)) +
-  geom_point(size = 5) +
-  geom_smooth(se = F)
-
-# Plot 2
-ggplot(mpg, aes(displ, hwy)) +
-  geom_point(size = 5) +
-  geom_smooth(se = F, aes(group = drv))
-
-# Plot 3
-ggplot(mpg, aes(displ, hwy, colour =  drv)) +
-  geom_point() +
-  geom_smooth(se = F)
-
-# Plot 4
-ggplot(mpg, aes(displ, hwy)) +
-  geom_point(aes(col = drv)) +
-  geom_smooth(se = F)
-
-# Plot 5
-ggplot(mpg, aes(displ, hwy)) +
-  geom_point(aes(colour =  drv)) +
-  geom_smooth(se = F, aes(linetype = drv))
-
-# Plot 6 -> think it's with shape? verify
-ggplot(mpg, aes(displ, hwy)) +
-  geom_point(aes(colour =  drv)) +
-  geom_smooth(se = F, aes(linetype = drv))
 
 ```
 
 
 ## Statistical Transformations
+
 Consider a bar chart based on the *diamonds* data set: 
+
 ```{r}
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut))
 ```
+
 
 As you can see, this graph does not use a *y*-variable. This is because a bar chart creates new values to plot by design. It works with the number of observations within a range or bin and displays the count per bin. This is the same for histograms and frequency polygons. The algorithm that calculates these new values for the graph is called a `stat()`, short short for statistical transformation. 
 
 You can learn which stat a geom uses by inspecting the default value for the stat argument. For example, `?geom_bar` shows that the default value for stat is “count”, which means that `geom_bar()` uses `stat_count()`. `stat_count()` is documented on the same page as `geom_bar()`, and if you scroll down you can find a section called “Computed variables”. That describes how it computes two new variables: *count* and *prop*.
 
 Generally, *stats* and *geoms* are interchangable. We recreate the same plot with the following. 
+
 ```{r}
 
 ggplot(data = diamonds) + 
