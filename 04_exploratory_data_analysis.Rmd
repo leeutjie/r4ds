@@ -1,0 +1,40 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+
+if (!require("tidyverse")) install.packages("tidyverse")
+library("tidyverse")
+
+```
+
+
+# Exploratory Data Analysis
+
+Exploratory data analysis (EDA) is an iterative cycle:
+
+1) Generate questions about your data.
+
+2) Search for answers by visualising, transforming, and modelling your data.
+
+3) Use what you learn to refine your questions and/or generate new questions.
+
+> "Your goal during EDA is to develop an understanding of your data." - R For Data Science
+
+
