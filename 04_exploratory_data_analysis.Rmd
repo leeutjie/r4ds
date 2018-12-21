@@ -27,6 +27,8 @@ library("tidyverse")
 
 # Exploratory Data Analysis
 
+## The Theoretic Underpinning
+
 Exploratory data analysis (EDA) is an iterative cycle:
 
 1) Generate questions about your data.
@@ -37,4 +39,60 @@ Exploratory data analysis (EDA) is an iterative cycle:
 
 > "Your goal during EDA is to develop an understanding of your data." - R For Data Science
 
+Two useful questions to ask about your data:
+
+1) What type of variation occurs within my variables?
+
+2) What type of covariation occurs between my variables?
+
+To facilitate these questions, let's define some terms:
+
+* **Variable** - a quantity, quality, or property that you can measure.
+
+* **Value** - the state of a variable when you measure it.
+
+* **Observation** - a set of measurements made under similar conditions.
+
+* **Tabular data** -a set of values, each associated with a variable and an observation.
+
+
+## Variation
+
+**Variation** is the tendency of the values of a variable to change from measurement to measurement.  Every variable has its own pattern of variation, which can reveal interesting information. The best way to understand that pattern is to visualise the distribution of the variable’s values.
+
+
+### Visualising Distribution
+
+How you visualise the distribution of a variable will depend on whether the variable is categorical or continuous. A variable is **categorical** if it can only take one of a small set of values. In R, categorical variables are usually saved as factors or character vectors. To examine the distribution of a categorical variable, use a bar chart:
+
+```{r}
+ggplot(data = diamonds) +
+  
+  geom_bar(mapping = aes(x = cut))
+```
+
+
+The height of the bars displays how many observations occurred with each x value. You can compute these values manually with `dplyr::count()`:
+
+```{r}
+diamonds %>% 
+  
+  count(cut)
+```
+
+A variable is **continuous** if it can take any of an infinite set of ordered values. To examine the distribution of a continuous variable, use a histogram:
+
+```{r}
+ggplot(data = diamonds) +
+  
+  geom_histogram(mapping = aes(x = carat), binwidth = 0.5)
+```
+
+You can compute this by hand by combining `dplyr::count()` and `ggplot2::cut_width()`:
+
+```{r}
+diamonds %>% 
+  
+  count(cut_width(carat, 0.5)) #??
+```
 
