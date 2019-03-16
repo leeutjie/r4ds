@@ -120,4 +120,44 @@ Having visualised variation, we need to interrogate the data. Here follow some q
 
 ### Typical Values
 
+Data visulisation helps us to turn descriptive information and typical values into useful questions. Consider the following for the `diamonds` data set:
+
+```{r}
+ggplot(data = smaller, mapping = aes(x = carat)) +
   
+  geom_histogram(binwidth = 0.01)
+```
+
+- Which values are the most common? Why?
+
+- Which values are rare? Why? Does that match your expectations?
+
+- Can you see any unusual patterns? What might explain them?
+
+- Why are there more diamonds at whole carats and common fractions of carats?
+
+- Why are there more diamonds slightly to the right of each peak than there are slightly to the left of each peak?
+
+- Why are there no diamonds bigger than 3 carats?
+
+Clusters of similar values suggest that subgroups exist in your data. To understand the subgroups, ask:
+
+- How are the observations within each cluster similar to each other?
+
+- How are the observations in separate clusters different from each other?
+
+- How can you explain or describe the clusters?
+
+- Why might the appearance of clusters be misleading?
+
+Clusters would look something like the Old Faithful data dataset:
+
+```{r}
+ggplot(data = faithful, mapping = aes(x = eruptions)) + 
+  
+  geom_histogram(binwidth = 0.25)
+```
+
+
+### Unusual Values
+
