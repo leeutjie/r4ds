@@ -161,3 +161,44 @@ ggplot(data = faithful, mapping = aes(x = eruptions)) +
 
 ### Unusual Values
 
+Outliers are observations that are unusual; data points that don’t seem to fit the pattern. Outliers are sometimes hard to spot:
+
+```{r}
+ggplot(diamonds) + 
+  
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5)
+```
+
+To make it easy to see the unusual values, we need to zoom to small values of the y-axis with `coord_cartesian()`.
+
+```{r}
+ggplot(diamonds) + 
+  
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
+  
+  coord_cartesian(ylim = c(0, 50))
+```
+
+`xlim()` and `ylim()` zoom in on the data, or throw away the data outside the limits, depending on how it they are used.
+
+We can see what's going on in the data with some `dplyr` magic:
+
+```{r}
+unusual <- 
+  
+  diamonds %>% 
+  
+  filter(y < 3 | y > 20) %>% 
+  
+  select(price, x, y, z) %>%
+  
+  arrange(y)
+
+unusual
+```
+
+
+It’s good practice to repeat your analysis with and without the outliers. If they have minimal effect on the results, and you can’t figure out why they’re there, it’s reasonable to replace them with missing values, and move on. However, if they have a substantial effect on your results, you shouldn’t drop them without justification. You’ll need to figure out what caused them (e.g. a data entry error) and disclose that you removed them in your write-up.
+
+
+### Missing Values
