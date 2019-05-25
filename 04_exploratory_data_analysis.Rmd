@@ -202,3 +202,47 @@ It’s good practice to repeat your analysis with and without the outliers. If t
 
 
 ### Missing Values
+
+Unusual values can be removed from the data set, but this may adversely affect your dataset if you have a low quality data set. Instead, it might be useful to replace your unusual values with `NA`s:
+
+```{r}
+diamonds2 <- diamonds %>% 
+  
+  mutate(y = ifelse(y < 3 | y > 20, NA, y))
+```
+
+
+Use `?ifelse()` to find out more about that function. If you need to mutate based on more (or more complex) criteria, `dplyr::case_when()` comes in really useful. `case_when()` is particularly useful inside mutate when you want to create a new variable that relies on a complex combination of existing variables.
+
+Package ggplot2 will tell you will tell you when it removes missing values:
+
+```{r}
+ggplot(data = diamonds2, mapping = aes(x = x, y = y)) + 
+  
+  geom_point()
+```
+
+
+Sometimes missing values themselves convey information, and should not just be disregarded as fillers. You might want to understand what makes observations with missing values different to observations with recorded values. For example, in `nycflights13::flights`, missing values in the `dep_time` variable indicate that the flight was cancelled. So you might want to compare the scheduled departure times for cancelled and non-cancelled times. You can do this by making a new variable with `is.na()`.
+
+```{r}
+nycflights13::flights %>% 
+  
+  mutate(
+    
+    cancelled = is.na(dep_time),
+    
+    sched_hour = sched_dep_time %/% 100,
+    
+    sched_min = sched_dep_time %% 100,
+    
+    sched_dep_time = sched_hour + sched_min / 60
+    
+  ) %>% 
+  
+  ggplot(mapping = aes(sched_dep_time)) + 
+  
+    geom_freqpoly(mapping = aes(colour = cancelled), binwidth = 1/4)
+```
+
+This comparison can still be improved, though.
