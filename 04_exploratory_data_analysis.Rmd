@@ -266,7 +266,7 @@ ggplot(diamonds) +
   geom_bar(mapping = aes(x = cut))
 ```
 
-We can fix this by having `geom_freqpoly()` plot according to density instead of the count. The *density* hereis the count standardised so that the area under each frequency polygon is one. 
+We can fix this by having `geom_freqpoly()` plot according to density instead of the count. The *density* her eis the count standardised so that the area under each frequency polygon is one. 
 
 ```{r}
 ggplot(data = diamonds, mapping = aes(x = price, y = ..density..)) + 
@@ -275,6 +275,15 @@ ggplot(data = diamonds, mapping = aes(x = price, y = ..density..)) +
 ```
 
 
+There’s something rather surprising about this plot - it appears that fair diamonds (the lowest quality) have the highest average price! But maybe that’s because frequency polygons are a little hard to interpret - there’s a lot going on in this plot.
+
+Another alternative to display the distribution of a continuous variable broken down by a categorical variable is the boxplot:
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, y = price)) +
+  
+  geom_boxplot()
+```
 
 
 
