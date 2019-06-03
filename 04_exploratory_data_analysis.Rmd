@@ -285,14 +285,34 @@ ggplot(data = diamonds, mapping = aes(x = cut, y = price)) +
   geom_boxplot()
 ```
 
+Many categorical variables don’t an intrinsic order (good, fair, bad), so you might want to reorder them to make a more informative display. One way to do that is with the `reorder()` function. 
+
+Take the `class` variable in the `mpg` dataset. You might be interested to know how highway mileage varies across classes:
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) +
+  
+  geom_boxplot()
+```
+
+To make the trend easier to see, we can reorder `class` based on the median value of `hwy`:
+
+```{r}
+ggplot(data = mpg) +
+  
+  geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy))
+```
+
+If you have long variable names, `geom_boxplot()` will work better if you flip it 90°. You can do that with `coord_flip()`.
 
 
-
-
-
-
-
-
+```{r}
+ggplot(data = mpg) +
+  
+  geom_boxplot(mapping = aes(x = reorder(class, hwy, FUN = median), y = hwy)) +
+  
+  coord_flip()
+```
 
 
 
