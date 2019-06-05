@@ -315,4 +315,42 @@ ggplot(data = mpg) +
 ```
 
 
+To visualise the covariation **between categorical variables**, you’ll need to count the number of observations for each combination. One way to do that is to rely on the `built-in geom_count()`:
+
+```{r}
+ggplot(data = diamonds) +
+  
+  geom_count(mapping = aes(x = cut, y = color))
+```
+
+
+Covariation will appear as a strong correlation between specific x values and specific y values.
+
+Another approach is to compute the count with dplyr's `count()` and then visualise with `geom_tile()` and the fill aesthetic:
+
+```{r}
+diamonds %>% 
+  
+  count(color, cut) %>%  
+  
+  ggplot(mapping = aes(x = color, y = cut)) +
+  
+    geom_tile(mapping = aes(fill = n))
+```
+
+To visualise covaration **between continous variables**, simply construct a scatter plot using `geom_point()`.  You can see covariation as a pattern in the points. For example, you can see an exponential relationship between the carat size and price of a diamond.
+
+```{r}
+ggplot(data = diamonds) +
+  
+  geom_point(mapping = aes(x = carat, y = price))
+```
+
+Scatterplots become less useful as the size of your dataset grows, because points begin to overplot, and pile up into areas of uniform black. Use the `alpha` aesthetic to fix this. 
+
+```{r}
+ggplot(data = diamonds) + 
+  
+  geom_point(mapping = aes(x = carat, y = price), alpha = 1 / 100)
+```
 
