@@ -199,7 +199,7 @@ unusual
 It’s good practice to repeat your analysis with and without the outliers. If they have minimal effect on the results, and you can’t figure out why they’re there, it’s reasonable to replace them with missing values, and move on. However, if they have a substantial effect on your results, you shouldn’t drop them without justification. You’ll need to figure out what caused them (e.g. a data entry error) and disclose that you removed them in your write-up.
 
 
-### Missing Values
+## Missing Values
 
 Unusual values can be removed from the data set, but this may adversely affect your dataset if you have a low quality data set. Instead, it might be useful to replace your unusual values with `NA`s:
 
@@ -246,7 +246,7 @@ nycflights13::flights %>%
 This comparison can still be improved, though.
 
 
-### Covariation
+## Covariation
 
 If variation describes the behavior **within** a variable, covariation describes the behavior **between** variables. It is the tendency for the values of two or more variables to vary together in a related way.Determining the degree of covariation depends on the types of the variables involved.
 
@@ -352,5 +352,95 @@ Scatterplots become less useful as the size of your dataset grows, because point
 ggplot(data = diamonds) + 
   
   geom_point(mapping = aes(x = carat, y = price), alpha = 1 / 100)
+```
+
+Even transparency, though, has its limits with very large datasets. Another useful approach is to bin the data. In addition to using `geom_histogram()` and `geom_freqpoly()` for binning one dimension, we can use `geom_bin2d()` and `geom_hex()` to bin two dimensions. The latter to functions divide the coordinate plane into two-dimensional bins and then fill with colour to indicate how many points fall in each bin.
+
+
+```{r}
+ggplot(data = smaller) +
+  
+  geom_bin2d(mapping = aes(x = carat, y = price))
+```
+
+In addition, there is a `geom_hex()` from the hexbin package that creates hexagons:
+
+```{r}
+# install.packages("hexbin")
+ggplot(data = smaller) +
+  
+  geom_hex(mapping = aes(x = carat, y = price))
+```
+
+Another option is to bin one continuous variable so it acts like a categorical variable. Here is an example with `carat`, where `cut_width(x, width)` is used to divide `x` into bins of width `width`.
+
+```{r}
+ggplot(data = smaller, mapping = aes(x = carat, y = price)) + 
+  
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.1)))
+```
+
+We could also display approximately the same number of points in each bin using `cut_number()`
+
+```{r}
+ggplot(data = smaller, mapping = aes(x = carat, y = price)) + 
+  
+  geom_boxplot(mapping = aes(group = cut_number(carat, 20)))
+```
+
+
+## Patterns and Models
+
+Patterns in your data provide clues about relationships. If you spot a pattern, ask yourself:
+
++ Could this pattern be due to coincidence (i.e. random chance)?
+
++ How can you describe the relationship implied by the pattern?
+
++ How strong is the relationship implied by the pattern?
+
++ What other variables might affect the relationship?
+
++ Does the relationship change if you look at individual subgroups of the data?
+
+
+A scatterplot of Old Faithful eruption lengths versus the wait time between eruptions shows a pattern:
+
+```{r}
+ggplot(data = faithful) + 
+  
+  geom_point(mapping = aes(x = eruptions, y = waiting))
+```
+
+Patterns provide one of the most useful tools for data scientists because they reveal covariation. If you think of variation as a phenomenon that creates uncertainty, covariation is a phenomenon that reduces it. If the covariation is due to a causal relationship (a special case), then you can use the value of one variable to control the value of the second.
+
+Models are a tool for extracting patterns out of data. For example, consider the diamonds data. It’s possible to use a model to remove the very strong relationship between two variables so we can explore the subtleties that remain.The following code fits a model that predicts `price` from `carat` and then computes the residuals (the difference between the predicted value and the actual value). The residuals give us a view of the price of the diamond, once the effect of carat has been removed.
+
+```{r}
+library(modelr)
+
+mod <- lm(log(price) ~ log(carat), data = diamonds)
+
+
+diamonds2 <- 
+  
+  diamonds %>% 
+  
+  add_residuals(mod) %>% 
+  
+  mutate(resid = exp(resid))
+
+
+ggplot(data = diamonds2) + 
+  
+  geom_point(mapping = aes(x = carat, y = resid))
+```
+
+Once you’ve removed the strong relationship between carat and price, you can see what you expect in the relationship between cut and price: relative to their size, better quality diamonds are more expensive.
+
+```{r}
+ggplot(data = diamonds2) + 
+  
+  geom_boxplot(mapping = aes(x = cut, y = resid))
 ```
 
