@@ -1,0 +1,93 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+```
+
+# Tibbles
+
+## Creating Tibbles
+
+Tibbles **are** data frames, but they tweak some older behaviours to make life a little easier. Tibbles are one of the unifying features of the tidyverse. Most other R packages use regular data frames, so you might want to coerce a data frame to a tibble. You can do that with `as_tibble()`:
+
+```{r}
+as_tibble(iris)
+```
+
+You can create a new tibble from individual vectors with `tibble()`, which automatically recycles inputs of length 1. It’s possible for a tibble to have column names that are not valid R variable names, aka *non-syntactic* names. To refer to these variables, you need to surround them with backticks, \\``\\`:
+
+```{r}
+tb <- 
+  tibble(
+    
+  `:)` = "smile", 
+  
+  ` ` = "space",
+  
+  `2000` = "number"
+)
+
+tb
+```
+
+
+Another function, `tribble()`, is customised for data entry in code: column headings are defined by formulas (i.e. they start with ~), and entries are separated by commas.
+
+```{r}
+tribble(
+  
+  ~x, ~y, ~z,
+  
+  #--|--|----
+  
+  "a", 2, 3.6,
+  
+  "b", 1, 8.5
+  
+)
+```
+
+
+## Tibbles vs. data.frame
+
+There are two main differences in the usage of a tibble vs. a classic `data.frame`: printing and subsetting.
+
+### Printing
+
+
+Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen.
+
+```{r}
+tibble(
+  
+  a = lubridate::now() + runif(1e3) * 86400,
+  
+  b = lubridate::today() + runif(1e3) * 30,
+  
+  c = 1:1e3,
+  
+  d = runif(1e3),
+  
+  e = sample(letters, 1e3, replace = TRUE)
+  
+)
+```
+
+
+Tibbles are designed so that you don’t accidentally overwhelm your console when you print large data frames. 
