@@ -68,8 +68,8 @@ tribble(
 
 There are two main differences in the usage of a tibble vs. a classic `data.frame`: printing and subsetting.
 
-### Printing
 
+### Printing
 
 Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen.
 
@@ -91,3 +91,56 @@ tibble(
 
 
 Tibbles are designed so that you don’t accidentally overwhelm your console when you print large data frames. 
+
+You can control the default print behaviour by setting options:
+
++ `options(tibble.print_max = n, tibble.print_min = m)`: if more than `n` rows, print only `m` rows. 
+
++ `options(tibble.print_min = Inf)` always shows all rows.
+
++ `options(tibble.width = Inf)` always prints all columns, regardless of the width of the screen.
+
++ For a complete list of options, view documentation using `package?tibble`.
+
++ R-studio's `View()` function is also useful for viewing at the en of long manipulations. 
+
+
+### Subsetting 
+
+`$` and `[[` can be used to pull out a single variable from a data frame. `[[` extracts by name and value while `$` only extracts by name but is a little less typing.
+
+```{r}
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5)
+)
+
+# Extract by name
+df$x
+```
+
+<br>
+
+```{r}
+# Extract by name
+df[["x"]]
+```
+
+<br>
+
+```{r}
+# Extract by position
+df[[1]]
+```
+
+To use these in a pipe, you’ll need to use the special placeholder `.`:
+```{r}
+df %>% .$x
+```
+
+```{r}
+df %>% .[["x"]]
+```
+
+Compared to a `data.frame`, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.
+
