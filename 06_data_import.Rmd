@@ -22,7 +22,9 @@ if (!require("tidyverse")) install.packages("tidyverse")
 
 # Data Import
 
-## Loading with `readr`
+## Getting Started
+
+### Loading with `readr`
 
 Most of readr’s functions are concerned with turning flat files into data frames:
 
@@ -43,7 +45,7 @@ Most of readr’s functions are concerned with turning flat files into data fram
 When using these functions the nice feature about them is that they print out a column specification that gives the name and type of each column.
 
 
-## Use Case for `read_csv`
+### Use Case for `read_csv`
 
 `read_csv()` uses the first line of the data for the column names, which is a very common convention. There are two cases where you might want to tweak this behaviour:
 
@@ -64,14 +66,14 @@ read_csv("# A comment I want to skip
 ```
 
 
-2. The data might not have column names. You can use `col_names = FALSE` to tell read_csv() not to treat the first row as headings.
+2. The data might not have column names. You can use `col_names = FALSE` to tell `read_csv()` not to treat the first row as headings.
 
 ```{r}
 read_csv("1,2,3\n4,5,6", col_names = FALSE)
 ```
 
 
-## Compared to base R
+### Compared to base R
 
 If you’ve used R before, you might wonder why we’re not using `read.csv()`. 
 
@@ -80,3 +82,74 @@ If you’ve used R before, you might wonder why we’re not using `read.csv()`.
 * They produce tibbles, they don’t convert character vectors to factors, use row names, or munge the column names. These are common sources of frustration with the base R functions.
 
 * They are more reproducible. Base R functions inherit some behaviour from your operating system and environment variables, so import code that works on your computer might not work on someone else’s.
+
+
+## Parsing a Vector
+
+To understand how to read a file from disk, we need to take a little detour to talk about the `parse_*()~ functions`. These functions take a character vector and return a more specialised vector like a logical, integer, or date. Thy form the bulding blocks for readr. 
+
+Using parsers is mostly a matter of understanding what’s available and how they deal with different types of input. There are eight particularly important parsers:
+
+
+1. `parse_logical()` and `parse_integer()` parse logicals and integers respectively. 
+
+2. `parse_double()` is a strict numeric parser, and `parse_number()` is a flexible numeric parser.
+
+3. `parse_character()`
+
+4. `parse_factor()` create factors, the data structure that R uses to represent categorical variables with fixed and known values.
+
+5. `parse_datetime()`, `parse_date()`, and `parse_time()` allow you to parse various date & time specifications.
+
+
+### Numbers
+
+Complications with numbers:
+
+1. Number separators are typically `.` or `,` for fractions. This typically solved with the notion of a locale:
+```{r}
+parse_double("1.23")
+parse_double("1,23", locale = locale(decimal_mark = ","))
+```
+
+2. Numbers can be surrounded by other characters such as `%` or `$`. This typically solved with `parse_number()`, which ignores non-numeric characters before and after the number:
+```{r}
+parse_number("$100")
+parse_number("20%")
+parse_number("It cost $123.45")
+```
+
+3. "Grouping" characters, such as the `,` in 1,000,000. This is typically soved with the combination of `parse_number()` and the locale as `parse_number()` will ignore the “grouping mark”:
+```{r}
+parse_number("$123,456,789")
+parse_number("123.456.789", locale = locale(grouping_mark = "."))
+parse_number("123'456'789", locale = locale(grouping_mark = "'"))
+```
+
+
+### Strings
+
+Readr uses UTF-8 for character encodings everywhere.This is a good default, but will fail for data produced by older systems that don’t understand UTF-8. If this happens to you, your strings will look weird when you print them. Sometimes just one or two characters might be messed up; other times you’ll get complete gibberish: 
+
+```{r}
+x1 <- "El Ni\xf1o was particularly bad this year"
+x2 <- "\x82\xb1\x82\xf1\x82\xc9\x82\xbf\x82\xcd"
+```
+
+To fix the problem you need to specify the encoding in `parse_character()`:
+
+```{r}
+parse_character(x1, locale = locale(encoding = "Latin1"))
+parse_character(x2, locale = locale(encoding = "Shift-JIS"))
+```
+
+To find the correct encoding is tricky. `guess_encoding()` can help figure it out. 
+```{r}
+guess_encoding(charToRaw(x1))
+guess_encoding(charToRaw(x2))
+```
+
+Find a more detailed explanaition at http://kunststube.net/encoding/.
+
+### Factors
+
