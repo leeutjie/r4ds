@@ -166,7 +166,7 @@ If you have many problematic entries, it’s often easier to leave as character 
 
 ### Dates, date-times, and times
 
-You pick between three parsers depending on whether you want a date (the number of days since 1970-01-01), a date-time (the number of seconds since midnight 1970-01-01), or a time (the number of seconds since midnight). When called without any additional arguments:
+You pick between three parsers depending on whether you want a date (the number of days since 1970-01-01), a date-time (the number of seconds since midnight 1970-01-01), or a time (the number of seconds since midnight). When called without any additional arguments:\
 
 + `parse_datetime()` expects an ISO8601 date-time.
 
@@ -231,3 +231,27 @@ These defaults don’t always work for larger files. There are two basic problem
 2. The column might contain a lot of missing values. If the first 1000 rows contain only NAs, readr will guess that it’s a character vector, whereas you probably want to parse it as something more specific.
 
 There are a few options for overcoming these strategies. Read about them [here](https://r4ds.had.co.nz/data-import.html#parsing-a-file)
+
+
+## Writing to a File
+
+Use `write_csv()` and `write_tsv()` to write data back to disc. Both functions always encoding strings in UTF-8 and save dates and date-times in ISO8601 format so they are easily parsed elsewhere. For Excel csv use `write_excel_csv()`. Using csv, though, loses columns types. There are two alternatives:
+
+1. `write_rds()` and `read_rds()` which store data in R’s custom binary format called RDS.
+
+2. The feather package implements a fast binary file format that can be shared across programming languages. Feather tends to be faster than RDS and is usable outside of R. RDS supports list-columns whereas feather currently does not.
+
+## Other Types of Data
+
+To get other types of data into R start with the tidyverse packages listed below:
+
++ *haven* reads SPSS, Stata, and SAS files.
+
++ *readxl* reads excel files (both `.xls` and `.xlsx`).
+
++ *DBI*, along with a database specific backend (e.g. RMySQL, RSQLite, RPostgreSQL etc) allows you to run SQL queries against a database and return a data frame.
+
+
+For hierarchical data: use jsonlite (by Jeroen Ooms) for json, and xml2 for XML. Jenny Bryan has some excellent worked examples at https://jennybc.github.io/purrr-tutorial/.
+
+For other file types, try the R data import/export manual and the `rio` package.
