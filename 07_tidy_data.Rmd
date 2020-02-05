@@ -1,0 +1,93 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+```
+
+
+> “Tidy datasets are all alike, but every messy dataset is messy in its own way.” –– Hadley Wickham
+
+You can represent the same underlying data in multiple ways, but these representations are not equally easy to use. One dataset, the tidy dataset, will be much easier to work with inside the tidyverse. If you’d like to learn more about the underlying theory of tidy data, you might enjoy the Tidy Data paper published in the Journal of Statistical Software, http://www.jstatsoft.org/v59/i10/paper. 
+
+There are three interrelated rules which make a dataset tidy:
+  
+  1. Each variable must have its own column.
+  
+  2. Each observation must have its own row.
+  
+  3. Each value must have its own cell.
+
+
+These three rules are interrelated because it’s impossible to only satisfy two of the three. That interrelationship leads to an even simpler set of practical instructions:
+
+  1. Put each dataset in a tibble.
+  2. Put each variable in a column.
+
+There’s a specific advantage to placing variables in columns because it allows R’s vectorised nature to shine. Most built-in R functions work with vectors of values. That makes transforming tidy data feel particularly natural. dplyr, ggplot2, and all the other packages in the tidyverse are designed to work with tidy data. Here are a couple of small examples showing how you might work with `table1`.
+
+# Pivoting
+
+The first step to tidying data is always to figure out what the variables and observations are. Sometimes this is easy; other times you’ll need to consult with the people who originally generated the data. The second step is to resolve one of two common problems:
+
+  1. One variable might be spread across multiple columns.
+
+  2. One observation might be scattered across multiple rows.
+  
+To fix these problems, you’ll need the two most important functions in tidyr: `pivot_longer()` and `pivot_wider()`.
+
+## Longer
+
+A common problem is a dataset where some of the column names are not names of variables, but _values_ of a variable:
+
+```{r}
+table4a
+```
+
+To tidy a dataset like this, we need to *pivot* the offending columns into a new pair of variables:
+
+```{r}
+table4a %>% 
+  
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+```
+
+Note that “1999” and “2000” are non-syntactic names (because they don’t start with a letter) so we have to surround them in backticks. In the final result, the pivoted columns are dropped, and we get new `year` and `cases` columns. 
+
+
+# Wider 
+
+`pivot_wider()` is the opposite of `pivot_longer()`. You use it when an observation is scattered across multiple rows: 
+ 
+```{r}
+table2
+```
+
+To tidy this up, we first analyse the representation in similar way to pivot_longer(). This time, however, we only need two parameters:
+
+  1. The column to take variable names from. Here, it’s `type`.
+
+  2. The column to take values from. Here it’s `count`.
+
+```{r}
+table2 %>%
+  
+    pivot_wider(names_from = type, values_from = count)
+```
+
+
