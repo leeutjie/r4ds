@@ -91,3 +91,61 @@ table2 %>%
 ```
 
 
+# Separating and Uniting
+
+## Separate
+
+Sometimes the situation arises where we have one column that contains two variables:
+
+```{r}
+table3
+```
+
+The `rate` column contains both `cases` and `population` variables, which need to be split into two columns:
+
+```{r}
+table3 %>% 
+  
+  separate(rate, into = c("cases", "population"))
+```
+
+By default, separate() will split values wherever it sees a non-alphanumeric character (i.e. a character that isn’t a number or letter). In the above example, `separate()` split by `/`. It is also possible to specify the separator:
+
+```{r}
+table3 %>%   
+  
+  separate(rate, into = c("cases", "population"), sep = "/")
+```
+
+By default, `separate()` splits character columns. We can ask `separate()` to try and convert to better types using `convert = TRUE`:
+
+```{r}
+table3 %>% 
+  
+  separate(rate, into = c("cases", "population"), convert = TRUE)
+```
+
+You can also pass a vector of integers to `sep`, which will interpret the integers as _positions_ to split at. Positive values start at 1 on the far-left of the strings; negative value start at -1 on the far-right of the strings.
+
+```{r}
+table3 %>% 
+  
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+
+## Unite
+
+`unite()` is the inverse of `separate()`: it combines multiple columns into a single column. Below is an example that reunites the split columns from a above:
+
+```{r}
+table5 %>% 
+  
+  unite(new, century, year)
+```
+
+In this case we also need to use the sep argument. The default will place an underscore (`_`) between the values from different columns.
+
+
+# Missing Values
+
