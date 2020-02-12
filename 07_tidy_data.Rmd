@@ -276,3 +276,61 @@ who2 <-
 who2
 ```
 
+We can separate the values in each code with two passes of `separate()`. The first pass will split the codes at each underscore.
+
+```{r}
+who3 <- who2 %>% 
+  
+  separate(key, c("new", "type", "sexage"), sep = "_")
+```
+
+Let's drop some unnecessary co0lumns:
+
+```{r}
+who4 <- who3 %>% 
+  
+  select(-new, -iso2, -iso3)
+```
+
+
+Next we’ll separate sexage into `sex` and `age` by splitting after the first character:
+
+```{r}
+who5 <- who4 %>% 
+  
+  separate(sexage, c("sex", "age"), sep = 1)
+
+who5
+```
+
+In a normal piping structure, this whole process would look as follows:
+
+```{r}
+who %>%
+  
+  pivot_longer(
+    
+    cols = new_sp_m014:newrel_f65, 
+    
+    names_to = "key", 
+    
+    values_to = "cases", 
+    
+    values_drop_na = TRUE
+    
+  ) %>% 
+  
+  mutate(
+    
+    key = stringr::str_replace(key, "newrel", "new_rel")
+    
+  ) %>%
+  
+  separate(key, c("new", "var", "sexage")) %>% 
+  
+  select(-new, -iso2, -iso3) %>% 
+  
+  separate(sexage, c("sex", "age"), sep = 1)
+```
+
+
