@@ -149,3 +149,130 @@ In this case we also need to use the sep argument. The default will place an und
 
 # Missing Values
 
+Changing the representation of a dataset brings up an important subtlety of missing values. Surprisingly, a value can be missing in one of two possible ways:
+
+ + *Explicitly* - flagged with an `NA`.
+ + *Implicitly* - simply not in the data.
+ 
+The following dataset illustrates this:
+
+```{r}
+stocks <- tibble(
+  
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+```
+
+2015 quarter has an `NA`, but 2016 quarter 1 is simply not there. 
+
+> An explicit missing value is the presence of an absence; an implicit missing value is the absence of a presence.
+
+The way that a dataset is represented can make implicit values explicit. For example, we can make the implicit missing value explicit by putting years in the columns:
+
+```{r}
+stocks %>% 
+   
+  pivot_wider(names_from = year, values_from = return)
+```
+
+Because these explicit missing values may not be important in other representations of the data, you can set `values_drop_na = TRUE` in `pivot_longer() `to turn explicit missing values implicit:
+
+```{r}
+stocks %>% 
+  
+  pivot_wider(names_from = year, values_from = return) %>% 
+  
+  pivot_longer(
+    
+    cols = c(`2015`, `2016`), 
+    
+    names_to = "year", 
+    
+    values_to = "return", 
+    
+    values_drop_na = TRUE
+  )
+```
+
+`complete()` takes a set of columns, and finds all unique combinations. It then ensures the original dataset contains all those values, filling in explicit `NAs` where necessary:
+
+```{r}
+stocks %>% 
+  
+  complete(year, qtr)
+```
+
+`fill()` takes a set of columns where you want missing values to be replaced by the most recent non-missing value (sometimes called last observation carried forward):
+
+```{r}
+treatment <- tribble(
+  ~ person,           ~ treatment, ~response,
+  "Derrick Whitmore", 1,           7,
+  NA,                 2,           10,
+  NA,                 3,           9,
+  "Katherine Burke",  1,           4
+)
+
+treatment %>% 
+  fill(person)
+```
+
+
+# Case Study
+
+The `tidyr::who` dataset contains tuberculosis (TB) cases broken down by year, country, age, gender, and diagnosis method. This is a very typical real-life example dataset. It contains redundant columns, odd variable codes, and many missing values.
+
+The best place to start is almost always to gather together the columns that are not variables: 
+
+  + It looks like `country`, `iso2`, and `iso3` are three variables that redundantly specify the country.
+
+  + `year` is clearly also a variable.
+
+  + We don’t know what all the other columns are yet, but given the structure in the variable names (e.g. `new_sp_m014`, `new_ep_m014`, `new_ep_f014`) these are likely to be values, not variables.
+
+We need to gather together all the columns from new_sp_m014 to newrel_f65. There are a lot of missing values in the current representation, so for now we’ll use `na.rm` just so we can focus on the values that are present.
+
+```{r}
+who1 <- 
+  
+  who %>% 
+  
+  pivot_longer(
+    
+    cols = new_sp_m014:newrel_f65, 
+    
+    names_to = "key", 
+    
+    values_to = "cases", 
+    
+    values_drop_na = TRUE
+    
+  )
+
+who1
+```
+
+We can get some hint of the structure of the values in the `new` key column by counting them:
+
+```{r}
+who1 %>% 
+  
+  count(key)
+```
+
+We need to make a minor fix to the format of the column names: unfortunately the names are slightly inconsistent because instead of new_rel we have newrel
+
+```{r}
+who2 <- 
+  
+  who1 %>% 
+  
+  mutate(names_from = stringr::str_replace(key, "newrel", "new_rel"))
+
+who2
+```
+
