@@ -47,5 +47,71 @@ We will use the nycflights13 package to learn about relational data.  nycflights
 
 + `weather` gives the weather at each NYC airport for each hour.
 
+
 # Keys
+
+The variables used to connect each pair of tables are called *keys*. A key is a variable (or set of variables) that uniquely identifies an observation. There are two types of keys:
+
++ A *primary key* uniquely identifies an observation in its own table.
+
++ A *foreign key* uniquely identifies an observation in another table.
+
+A variable can be both a primary key and a foreign key. Once you’ve identified the primary keys in your tables, it’s good practice to verify that they do indeed uniquely identify each observation:
+
+```{r}
+planes %>% 
+  
+  count(tailnum) %>% 
+  
+  filter(n > 1)
+```
+
+
+```{r}
+flights %>% 
+  
+  count(year, month, day, flight) %>% 
+  
+  filter(n > 1)
+```
+
+Sometimes a table doesn’t have an explicit primary key: each row is an observation, but no combination of variables reliably identifies it. For example, what’s the primary key in the `flights` table You might think it would be the date plus the flight or tail number, but neither of those are unique:
+
+```{r}
+flights %>% 
+
+  count(year, month, day, flight) %>% 
+  
+  filter(n > 1)
+
+
+flights %>% 
+  
+  count(year, month, day, tailnum) %>% 
+  
+  filter(n > 1)
+```
+
+If a table lacks a primary key, it’s sometimes useful to add one with `mutate()` and `row_number()`. This is called a *surrogate key*. 
+
+A primary key and the corresponding foreign key in another table form a *relation*. Relations are typically one-to-many.
+
+
+# Mutating Joins
+
+A *mutating join* allows you to combine variables from two tables. It first matches observations by their keys, then copies across variables from one table to the other. The join functions add variables to the right, so if you have a lot of variables already, the new variables won’t get printed out. We'll create a narrower dataset so it is easier to see what's happening: 
+
+```{r}
+flights2 <- flights %>% 
+  
+  select(year:day, hour, origin, dest, tailnum, carrier)
+
+flights2
+```
+
+What follows are the key concepts for mutating joins. For more detail, see the actual [chapter](https://r4ds.had.co.nz/relational-data.html#mutating-joins), and this [tweet](https://twitter.com/yutannihilation/status/551572539697143808). You can also run `vignette("two-table")` in your console for more information. 
+
+
+
+\
 
