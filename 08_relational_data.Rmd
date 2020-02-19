@@ -112,6 +112,98 @@ flights2
 What follows are the key concepts for mutating joins. For more detail, see the actual [chapter](https://r4ds.had.co.nz/relational-data.html#mutating-joins), and this [tweet](https://twitter.com/yutannihilation/status/551572539697143808). You can also run `vignette("two-table")` in your console for more information. 
 
 
++ An *inner join* matches pairs of observations whenever their keys are equal.
 
-\
++ An *outer join* keeps observations that appear in at least one of the tables.There are three types of outer joins. If tables `x` and `y` are joined, 
+  1. a *left join* keeps all observations in `x`.
+  2. a *right join* keeps all observations in `y`.
+  3. a *full join* keeps all observations in `x` and `y`.
 
+Outer joins work by adding an additional “virtual” observation to each table. This observation has a key that always matches (if no other key matches), and a value filled with `NA`.
+  
+
+## Duplicate Keys
+
+This section explains what happens when the keys are not unique. There are two possibilities:
+
+1. One table has duplicate keys. This is useful when you want to add in additional information as there is typically a one-to-many relationship.
+  
+```{r}
+x <- tribble(
+  
+  ~key, ~val_x,
+  
+     1, "x1",
+  
+     2, "x2",
+  
+     2, "x3",
+  
+     1, "x4"
+  
+)
+
+y <- tribble(
+  
+  ~key, ~val_y,
+  
+     1, "y1",
+  
+     2, "y2"
+  
+)
+
+left_join(x, y, by = "key")
+```
+  
+2. Both tables have duplicate keys. This is usually an error because in neither table do the keys uniquely identify an observation. When you join duplicated keys, you get all possible combinations, the Cartesian product.
+  
+```{r}
+x <- tribble(
+  
+  ~key, ~val_x,
+  
+     1, "x1",
+  
+     2, "x2",
+  
+     2, "x3",
+  
+     3, "x4"
+  
+)
+
+y <- tribble(
+  
+  ~key, ~val_y,
+  
+     1, "y1",
+  
+     2, "y2",
+  
+     2, "y3",
+  
+     3, "y4"
+  
+)
+
+left_join(x, y, by = "key")
+```
+  
+  
+## Defining Key columns
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
