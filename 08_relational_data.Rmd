@@ -191,19 +191,132 @@ left_join(x, y, by = "key")
 ```
   
   
-## Defining Key columns
+## Defining the Key columns
+
+It is possible to specify columns to join by:
+
++ The default, `by = NULL`, uses all variables that appear in both tables, the so called **natural** join.
+
+```{r}
+flights2 %>% 
+  
+  left_join(weather)
+```
+
++ A character vector, `by = "x"`.
+
+```{r}
+flights2 %>% 
+  
+  left_join(planes, by = "tailnum")
+```
+
++ A named character vector: `by = c("a" = "b")`. This will match variable `a` in table `x` to variable `b` in table `y.` The variables from `x` will be used in the output.
+
+```{r}
+flights2 %>% 
+   
+  left_join(airports, c("dest" = "faa"))
+```
+
+# Filtering Joins
+
+Filtering joins match observations in the same way as mutating joins, but affect the observations, not the variables. There are two types:
+
++ `semi_join(x, y)` keeps all observations in `x` that have a match in `y`.
++ `anti_join(x, y)` drops all observations in `x` that have a match in `y`.
+
+Semi-joins are useful for matching filtered summary tables back to the original rows. For example, imagine you’ve found the top ten most popular destinations:
+
+```{r}
+top_dest <- 
+  
+  flights %>%
+  
+  count(dest, sort = TRUE) %>%
+  
+  head(10)
+
+top_dest
+```
+
+The semi-join, which connects two tables like a mutating join, but instead of adding new columns, only keeps the rows in x that have a match in y:
+
+```{r}
+flights %>% 
+
+  semi_join(top_dest)
+```
+
+Anti-joins are useful for diagnosing join mismatches.
+
+```{r}
+flights %>%
+  
+  anti_join(planes, by = "tailnum") %>%
+  
+  count(tailnum, sort = TRUE)
+```
 
 
+# Set Operations
+
+Set operations are occasionally useful when you want to break a single complex filter into simpler pieces. These expect the x and y inputs to have the same variables, and treat the observations like sets:
+
+
+ + `intersect(x, y)`: return only observations in both `x` and `y`.
+ + `union(x, y)`: return unique observations in `x` and `y`.
+ + `setdiff(x, y)`: return observations in `x`, but not in `y`.
+
+Examples:
+
+```{r}
+df1 <- tribble(
   
+  ~x, ~y,
   
+   1,  1,
   
+   2,  1
   
+)
+
+df2 <- tribble(
   
+  ~x, ~y,
   
+   1,  1,
   
+   1,  2
   
-  
-  
-  
-  
-  
+)
+```
+
+The four possibilities are:
+
+```{r}
+intersect(df1, df2)
+
+union(df1, df2)
+
+setdiff(df1, df2)
+
+setdiff(df2, df1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
