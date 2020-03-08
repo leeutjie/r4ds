@@ -1,0 +1,199 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+```
+
+The focus of this chapter will be on regular expressions, or regexps for short. Regular expressions are useful because strings usually contain unstructured or semi-structured data, and regexps are a concise language for describing patterns in strings.This chapter will focus on the stringr package for string manipulation, which is part of the core tidyverse.
+
+# String Basics
+
+You can create strings with either single quotes or double quotes:
+
+```{r}
+string1 <- "This is a string"
+
+string2 <- 'If I want to include a "quote" inside a string, I use single quotes'
+```
+
+To include a literal single or double quote in a string you can use \ to “escape” it:
+
+```{r}
+double_quote <- "\"" # or '"'
+
+single_quote <- '\'' # or "'"
+```
+
+Beware that the printed representation of a string is not the same as string itself, because the printed representation shows the escapes. To see the raw contents of the string, use `writeLines()`:
+
+```{r}
+x <- c("\"", "\\")
+
+writeLines(x)
+```
+
+The most common are "\n", newline, and "\t", tab. You can see the complete list by requesting help on ": ?'"', or ?"'". You’ll also sometimes see strings like "\u00b5", this is a way of writing non-English characters that works on all platforms:
+
+```{r}
+x <- "\u00b5"
+x
+```
+
+
+Multiple strings are often stored in a character vector, which you can create with `c()`:
+
+```{r}
+c("one", "two", "three")
+```
+
+
+## String Length
+
+We'll use some functions from the stringr package. These have more intuitive names, and all start with str_. For example, str_length() tells you the number of characters in a string:
+
+```{r}
+str_length(c("a", "R for data science", NA))
+```
+
+
+## Combining Strings
+
+To combine two or more strings, `use str_c()`:
+
+```{r}
+str_c("x", "y")
+
+str_c("x", "y", "z")
+
+str_c("x", "y", sep = ", ")
+```
+
+If you want to print missing values as "NA", use `str_replace_na()`.
+
+```{r}
+x <- c("abc", NA)
+
+str_c("|-", x, "-|")
+
+str_c("|-", str_replace_na(x), "-|")
+```
+
+As shown above, `str_c()` is vectorised, and it automatically recycles shorter vectors to the same length as the longest:
+
+```{r}
+str_c("prefix-", c("a", "b", "c"), "-suffix")
+```
+
+Objects of length 0 are silently dropped. This is particularly useful in conjunction with `if`:
+
+```{r}
+name <- "Hadley"
+
+time_of_day <- "morning"
+
+birthday <- FALSE
+
+
+str_c(
+  
+  "Good ", time_of_day, " ", name,
+  
+  if (birthday) " and HAPPY BIRTHDAY",
+  
+  "."
+  
+)
+```
+
+To collapse a vector of strings into a single string, use `collapse`:
+
+```{r}
+str_c(c("x", "y", "z"), collapse = ", ")
+```
+
+## Subsetting Strings
+
+You can extract parts of a string using `str_sub()`:
+
+```{r}
+x <- c("Apple", "Banana", "Pear")
+
+str_sub(string = x, start = 1, end = 3)
+```
+
+Note that `str_sub()` won’t fail if the string is too short; it will just return as much as possible:
+
+```{r}
+str_sub("a", 1, 5)
+```
+
+You can also use the assignment form of `str_sub()` to modify strings:
+
+```{r}
+str_sub(x, 1, 1) <- str_to_lower(str_sub(x, 1, 1))
+
+x
+```
+
+## Locales
+
+You can also use `str_to_upper()` or `str_to_title()`. However, changing case is more complicated than it might at first appear because different languages have different rules for changing case. You can pick which set of rules to use by specifying a locale:
+
+```{r}
+# Turkish has two i's: with and without a dot, and it
+# has a different rule for capitalising them:
+str_to_upper(c("i", "ı"))
+
+str_to_upper(c("i", "ı"), locale = "tr")
+```
+
+The locale is specified as a ISO 639 language code, which is a two or three letter abbreviation. If you leave the locale blank, it will use the current locale, as provided by your operating system. Click [here](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) to see a list of ISO codes.
+
+The base R `order()` and `sort()` functions sort strings using the current locale. If you want robust behaviour across different computers, you may want to use str_sort() and str_order() which take an additional locale argument:
+
+```{r}
+x <- c("apple", "eggplant", "banana")
+
+str_sort(x, locale = "en")  # English
+
+str_sort(x, locale = "haw") # Hawaiian
+```
+
+
+# Matching patterns with regular expressions
+
+Regexps are a very terse language that allow you to describe patterns in strings.To learn regular expressions, we can use `str_view()` and `str_view_all()`.
+
+## Basic matches
+
+The simplest patterns match exact strings:
+
+```{r}
+x <- c("apple", "banana", "pear")
+
+str_view(x, "an")
+```
+
+The next step up in complexity is `.`, which matches any character (except a newline):
+
+```{r}
+str_view(x, ".a.")
+```
+
+
