@@ -196,4 +196,60 @@ The next step up in complexity is `.`, which matches any character (except a new
 str_view(x, ".a.")
 ```
 
+To match a `.` in regexp, we need to use a double escape, `\\`. This is because regexp use `\` as an escape character, but `\` is also used as an escape character in strings, which are used to represent regexp. 
+
+```{r}
+# To create the regular expression, we need \\
+dot <- "\\."
+
+# But the expression itself only contains one:
+writeLines(dot)
+#> \.
+
+# And this tells R to look for an explicit .
+str_view(c("abc", "a.c", "bef"), "a\\.c")
+```
+
+Subsequently, we need `\\\\` to match `\`. 
+
+```{r}
+x <- "a\\b"
+writeLines(x)
+#> a\b
+
+str_view(x, "\\\\")
+```
+
+
+## Anchors
+
+By default, regular expressions will match any part of a string. It’s often useful to _anchor_ the regular expression so that it matches from the start or end of the string.
+
++ ^ to match the start of the string.
+
++ $ to match the end of the string.
+
+```{r}
+x <- c("apple", "banana", "pear")
+
+str_view(x, "^a")
+```
+
+```{r}
+str_view(x, "a$")
+```
+
+To force a regular expression to only match a complete string, anchor it with both `^` and `$`:
+
+```{r}
+x <- c("apple pie", "apple", "apple cake")
+
+str_view(x, "apple")
+```
+
+```{r}
+str_view(x, "^apple$")
+```
+
+## Character Classes and Alternatives
 
