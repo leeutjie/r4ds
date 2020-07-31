@@ -1,0 +1,228 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+```
+
+The focus of this chapter will be on factors. In R, factors are used to work with categorical variables, variables that have a fixed and known set of possible values. They are also useful when you want to display character vectors in a non-alphabetical order.
+
+# Creating Factors
+
+Often, using character vectors messes with ordering and, if you're repeating vectors, it's easy to make typo's. To create a factor you must start by creating a list of the valid **levels**:
+
+```{r}
+month_levels <- c(
+  
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+  
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  
+)
+
+x1 <- c("Dec", "Apr", "Jan", "Mar")
+x2 <- c("Dec", "Apr", "Jam", "Mar") # Meant to contain a typo
+```
+
+Now you can create a factor for a subset of months, for example:
+
+```{r}
+y1 <- factor(x1, levels = month_levels)
+y1
+
+sort(y1)
+```
+
+Any values not in the set will be silently converted to NA:
+
+```{r}
+y2 <- factor(x2, levels = month_levels)
+
+y2
+```
+
+If you want a warning, you can use `readr::parse_factor()`:
+
+```{r}
+y2 <- parse_factor(x2, levels = month_levels)
+```
+
+
+If you omit the levels, they’ll be taken from the data in alphabetical order:
+
+```{r}
+factor(x1)
+```
+
+if you prefer that the order of the levels match the order of the first appearance in the data, use the following:
+
+```{r}
+f1 <- factor(x1, levels = unique(x1))
+
+f1
+
+# OR
+
+f2 <- x1 %>% factor() %>% fct_inorder()
+
+f2
+```
+
+
+If you ever need to access the set of valid levels directly, you can do so with `levels()`:
+
+# General Social Survey
+
+Moving forward we're going to use `forcats::gss_cat` as an example dataset. 
+
+```{r}
+forcats::gss_cat
+```
+
+When factors are stored in a tibble, you can’t see their levels so easily. One way to see them is with `count()`:
+
+```{r}
+gss_cat %>%
+  
+  count(race)
+```
+
+Also with a barchart:
+
+```{r}
+ggplot(gss_cat, aes(race)) +
+  
+  geom_bar()
+```
+
+By default, ggplot2 will drop levels that don’t have any values. You can force them to display with:
+
+```{r}
+ggplot(gss_cat, aes(race)) +
+
+    geom_bar() +
+
+    scale_x_discrete(drop = FALSE)
+```
+
+
+# Modifying Factor Order
+
+It’s often useful to change the order of the factor levels in a visualisation. You can go from 
+
+```{r}
+relig_summary <- 
+  gss_cat %>%
+  group_by(relig) %>%
+  summarise(
+    age = mean(age, na.rm = TRUE),
+    tvhours = mean(tvhours, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(relig_summary, aes(tvhours, relig)) + geom_point()
+```
+
+to the following
+
+```{r}
+ggplot(relig_summary, aes(tvhours, fct_reorder(relig, tvhours))) +
+  
+  geom_point()
+```
+
+by using `fct_reorder()`. It takes three arguments:
+
++ `f`, the factor whose levels you want to modify.
+
++ `x`, a numeric vector that you want to use to reorder the levels.
+
++ Optionally, `fun`, a function that’s used if there are multiple values of `x` for each value of `f`. The default value is `median`.
+
+
+
+It is, however, better to reserve `fct_reorder()` for factors whose levels are arbitrarily ordered. Reordering according to income, for instance, doesn't make sense:
+
+```{r}
+rincome_summary <- gss_cat %>%
+  
+  group_by(rincome) %>%
+  
+  summarise(
+  
+      age = mean(age, na.rm = TRUE),
+    
+      tvhours = mean(tvhours, na.rm = TRUE),
+    
+      n = n()
+  
+    )
+
+ggplot(rincome_summary, aes(age, fct_reorder(rincome, age))) + geom_point()
+```
+
+
+`fct_relevel()` takes the following arguments: 
+
+  + factor, `f`, and then any number of levels that you want to move to the front of the line. Here we move "Not Applicable":
+
+```{r}
+ggplot(rincome_summary, aes(age, fct_relevel(rincome, "Not applicable"))) +
+  
+  geom_point()
+```
+
+Another type of reordering is useful when you are colouring the lines on a plot. `fct_reorder2()` reorders the factor by the `y` values associated with the largest `x` values. This makes the plot easier to read because the line colours line up with the legend.
+
+```{r}
+by_age <- gss_cat %>%
+  
+  filter(!is.na(age)) %>%
+  
+  count(age, marital) %>%
+  
+  group_by(age) %>%
+  
+  mutate(prop = n / sum(n))
+
+
+ggplot(by_age, aes(age, prop, colour = marital)) +
+  
+  geom_line(na.rm = TRUE)
+
+
+ggplot(by_age, aes(age, prop, colour = fct_reorder2(marital, age, prop))) +
+
+  geom_line() +
+  
+  labs(colour = "marital")
+```
+
+Finally, for bar plots, you can use `fct_infreq()` to order levels in increasing frequency: this is the simplest type of reordering because it doesn’t need any extra variables. You may want to combine with `fct_rev()`.
+
+```{r}
+gss_cat %>%
+  
+  mutate(marital = marital %>% fct_infreq() %>% fct_rev()) %>%
+  
+  ggplot(aes(marital)) +
+  
+  geom_bar()
+```
+
