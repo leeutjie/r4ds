@@ -1,0 +1,57 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway:
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+```
+
+# Pipes
+
+The pipe, `%>%`, comes from the magrittr package by Stefan Milton Bache. Packages in the tidyverse load %>% for you automatically, so you don’t usually load **magrittr** explicitly. Here, however, we’re focussing on piping, and we aren’t loading any other packages, so we will load it explicitly.
+
+```{r}
+library(magrittr)
+```
+
+The point of the pipe is to help you write code in a way that is easier to read and understand.The point of the pipe is to help you write code in a way that is easier to read and understand. Without the pipe, you might write code that needs to store the result at each step. If there are natural names, this is a good idea, and you should do it. But many times there aren’t natural names, and you add numeric suffixes to make the names unique. That leads to two problems:
+
+1. The code is cluttered with unimportant names
+2. You have to carefully increment the suffix on each line.
+
+Memory should generally not be a problem, though. R isn’t stupid, and it will share columns across data frames, where possible. Let’s take a look at an actual data manipulation pipeline where we add a new column to `ggplot2::diamonds`: 
+
+```{r}
+diamonds <- ggplot2::diamonds
+diamonds2 <- diamonds %>% 
+  dplyr::mutate(price_per_carat = price / carat)
+
+pryr::object_size(diamonds)
+pryr::object_size(diamonds2)
+pryr::object_size(diamonds, diamonds2)
+```
+
+From above, you can see that `diamonds2` has 10 columns in common with `diamonds`: there’s no need to duplicate all that data, so the two data frames have| variables in common. These variables will only get copied if you modify one of them. 
+
+Instead of creating intermediate objects at each step, we could overwrite the original object.This is less typing (and less thinking), so you’re less likely to make mistakes. However, there are two problems:
+
+1. Debugging is painful: if you make a mistake you’ll need to re-run the complete pipeline from the beginning.
+2. The repetition of the object being transformed (we’ve written foo_foo six times!) obscures what’s changing on each line.
+
+
+Another approach is to abandon assignment and just string the function calls together:
