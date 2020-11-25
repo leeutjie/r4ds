@@ -1,0 +1,49 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+First, we install/load the relevant packages by installing the [tidyverse](https://www.tidyverse.org/) library. This "package" effectively contains all packages developed by *the* [Hadley Wickham](http://hadley.nz/) that relate to the [tidy data](https://www.jstatsoft.org/article/view/v059i10) way of thinking. This chapter focuses on specific libraries, but we install and load the whole `tidyverse` anyway. We Also load the `lubridate` package and the `nycflights13` dataset. 
+
+```{r load}
+if (!require("tidyverse")) install.packages("tidyverse")
+
+library(lubridate)
+library(nycflights13)
+```
+
+This chapter will show you how to work with dates and times in R.
+
+# Creating date/times
+
+There are three types of date/time data that refer to an instant in time:
+
+1. A **date**. Tibbles print this as `<date>`.
+
+2. A **time** within a day. Tibbles print this as `<time>`.
+
+3. A **date-time** is a date plus a time: it uniquely identifies an instant in time (typically to the nearest second). Tibbles print this as `<dttm>`. Elsewhere in R these are called POSIXct, but I don’t think that’s a very useful name.
+
+In this chapter we are only going to focus on dates and date-times as R doesn’t have a native class for storing times. If you need one, you can use the *hms* package.
+
+To get the current date or date-time you can use `today()` or `now()`:
+
+```{r}
+today()
+
+now()
+```
+
+You can also create a date/time from a string, from individual date-time components and from an existing date/time object.
