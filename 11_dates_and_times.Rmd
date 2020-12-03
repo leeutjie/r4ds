@@ -235,5 +235,26 @@ flights_dt %>%
 Computing the difference between a rounded and unrounded date can be particularly useful.
 
 
+## Setting components
 
+You can also use each accessor function to set the components of a date/time:
+
+```{r}
+(datetime <- ymd_hms("2016-07-08 12:34:56"))
+
+year(datetime) <- 2020
+datetime
+
+month(datetime) <- 01
+datetime
+
+hour(datetime) <- hour(datetime) + 1
+datetime
+```
+
+Alternatively, rather than modifying in place, you can create a new date-time with `update()`. This also allows you to set multiple values at once.
+
+```{r}
+update(datetime, year = 2020, month = 2, mday = 2, hour = 2)
+```
 
