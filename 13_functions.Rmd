@@ -1,0 +1,223 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: lumen
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+<br>
+
+This section is part of a series that serves as a condensed summary of the [R for Data Science](http://r4ds.had.co.nz/index.html) book as I work through it. The purpose is to use this series as a quick reference in future.
+
+The focus of this chapter is on writing functions in base R, so you won’t need any extra packages.
+
+# Functions
+
+One of the best ways to improve your reach as a data scientist is to write functions. Functions allow you to automate common tasks in a more powerful and general way than copy-and-pasting. Writing a function has three big advantages over using copy-and-paste:
+
+ 1. You can give a function an evocative name that makes your code easier to understand.
+
+ 2. As requirements change, you only need to update code in one place, instead of many.
+
+ 3. You eliminate the chance of making incidental mistakes when you copy and paste (i.e. updating a variable name in one place, but not in another).
+
+## When to write a function
+
+You should consider writing a function whenever you’ve copied and pasted a block of code more than twice. Copy and pasting can be error prone:
+
+```{r}
+df <- tibble::tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+df$a <- (df$a - min(df$a, na.rm = TRUE)) / 
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$b <- (df$b - min(df$b, na.rm = TRUE)) / 
+  (max(df$b, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$c <- (df$c - min(df$c, na.rm = TRUE)) / 
+  (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
+df$d <- (df$d - min(df$d, na.rm = TRUE)) / 
+  (max(df$d, na.rm = TRUE) - min(df$d, na.rm = TRUE))
+```
+
+There was an error when copying-and-pasting the code for df$b: We forgot to change an a to a b. Extracting repeated code out into a function is a good idea because it prevents you from making this type of mistake.
+
+To write a function you need to first analyse the code. How many inputs does it have?
+
+```{r}
+(df$a - min(df$a, na.rm = TRUE)) /
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+```
+
+This code only has one input: `df$a`. To make the inputs more clear, it’s a good idea to rewrite the code using temporary variables with general names. Here this code only requires a single numeric vector, so call it `x`:
+
+```{r}
+x <- df$a
+(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+```
+
+There is some duplication in this code. We’re computing the range of the data three times, so it makes sense to do it in one step:
+
+```{r}
+rng <- range(x, na.rm = TRUE)
+(x - rng[1]) / (rng[2] - rng[1])
+```
+
+Pulling out intermediate calculations into named variables is a good practice because it makes it more clear what the code is doing. Let's turn it into a function.
+
+```{r}
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+rescale01(c(0, 5, 10))
+```
+
+There are three key steps to creating a new function:
+
+1. You need to pick a useful **name** for the function.
+2. You list the inputs, or **arguments**, to the function inside function.
+3. You place the code you have developed in **body** of the function, a { block that immediately follows `function(...)`.
+
+Note the overall process: I only made the function after I’d figured out how to make it work with a simple input. It’s easier to start with working code and turn it into a function; it’s harder to create a function and then try to make it work. 
+
+At this point it’s a good idea to check your function with a few different inputs:
+
+```{r}
+rescale01(c(-10, 0, 10))
+rescale01(c(1, 2, 3, NA, 5))
+```
+
+
+As you write more and more functions you’ll eventually want to convert these informal, interactive tests into formal, automated tests. That process is called [unit testing](http://r-pkgs.had.co.nz/tests.html).
+
+Another advantage of functions is that if our requirements change, we only need to make the change in one place. For example, we might discover that some of our variables include infinite values, and `rescale01()` fails:
+
+```{r}
+x <- c(1:10, Inf)
+rescale01(x)
+```
+
+Because we’ve extracted the code into a function, we only need to make the fix in one place:
+
+```{r}
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE, finite = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+rescale01(x)
+```
+
+This is an important part of the “do not repeat yourself” (or DRY) principle. The more repetition you have in your code, the more places you need to remember to update when things change (and they always do!), and the more likely you are to create bugs over time.
+
+# Functions are for humans and computers
+
+It’s important to remember that functions are not just for the computer, but are also for humans. R doesn’t care what your function is called, or what comments it contains, but these are important for human readers.
+
+The name of a function is important. Ideally, the name of your function will be short, but clearly evoke what the function does. That’s hard! But it’s better to be clear than short, as RStudio’s autocomplete makes it easy to type long names.
+
+Generally, function names should be verbs, and arguments should be nouns. There are some exceptions: nouns are ok if the function computes a very well known noun (i.e. mean() is better than compute_mean()), or accessing some property of an object (i.e. coef() is better than get_coefficients()). A good sign that a noun might be a better choice is if you’re using a very broad verb like “get”, “compute”, “calculate”, or “determine”. Use your best judgement and don’t be afraid to rename a function if you figure out a better name later.
+
+```{r}
+# Too short
+f()
+
+# Not a verb, or descriptive
+my_awesome_function()
+
+# Long, but clear
+impute_missing()
+collapse_years()
+```
+
+If your function name is composed of multiple words, I recommend using “snake_case”, where each lowercase word is separated by an underscore. camelCase is a popular alternative. It doesn’t really matter which one you pick, the important thing is to be consistent: pick one or the other and stick with it. R itself is not very consistent, but there’s nothing you can do about that. Make sure you don’t fall into the same trap by making your code as consistent as possible.
+
+```{r}
+# Never do this!
+col_mins <- function(x, y) {}
+rowMaxes <- function(y, x) {}
+```
+
+f you have a family of functions that do similar things, make sure they have consistent names and arguments. Use a common prefix to indicate that they are connected. That’s better than a common suffix because autocomplete allows you to type the prefix and see all the members of the family.
+
+```{r}
+# Good
+input_select()
+input_checkbox()
+input_text()
+
+# Not so good
+select_input()
+checkbox_input()
+text_input()
+```
+
+A good example of this design is the stringr package: if you don’t remember exactly which function you need, you can type `str_` and jog your memory.
+
+Where possible, avoid overriding existing functions and variables. It’s impossible to do in general because so many good names are already taken by other packages, but avoiding the most common names from base R will avoid confusion.
+
+```{r}
+# Don't do this!
+T <- FALSE
+c <- 10
+mean <- function(x) sum(x)
+```
+
+Use comments, lines starting with #, to explain the “why” of your code. You generally should avoid comments that explain the “what” or the “how”. If you can’t understand what the code does from reading it, you should think about how to rewrite it to be more clear. Do you need to add some intermediate variables with useful names? Do you need to break out a subcomponent of a large function so you can name it? However, your code can never capture the reasoning behind your decisions: why did you choose this approach instead of an alternative? What else did you try that didn’t work? It’s a great idea to capture that sort of thinking in a comment.
+
+Another important use of comments is to break up your file into easily readable chunks. Use long lines of `-` and `=` to make it easy to spot the breaks.
+
+```{r}
+# Load data --------------------------------------
+
+# Plot data --------------------------------------
+```
+
+# Conditional execution
+
+An `if` statement allows you to conditionally execute code. It looks like this:
+
+```{r}
+if (condition) {
+  # code executed when condition is TRUE
+} else {
+  # code executed when condition is FALSE
+}
+```
+
+To get help on `if` you need to surround it in backticks: ?`if`. The help isn’t particularly helpful if you’re not already an experienced programmer, but at least you know how to get to it!
+
+Here’s a simple function that uses an `if` statement. The goal of this function is to return a logical vector describing whether or not each element of a vector is named.
+
+```{r}
+has_name <- function(x) {
+  nms <- names(x)
+  if (is.null(nms)) {
+    rep(FALSE, length(x))
+  } else {
+    !is.na(nms) & nms != ""
+  }
+}
+```
+
+This function takes advantage of the standard return rule: a function returns the last value that it computed. Here that is either one of the two branches of the `if` statement.
+
+## Conditions
+
+The `condition` must evaluate to either TRUE or FALSE. If it’s a vector, you’ll get a warning message; if it’s an NA, you’ll get an error. Watch out for these messages in your own code:
+
+```{r}
+if (c(TRUE, FALSE)) {}
+
+if (NA) {}
+```
+
