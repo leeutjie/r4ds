@@ -145,3 +145,26 @@ for (i in seq_along(df)) {
 Typically you’ll be modifying a list or data frame with this sort of loop, so remember to use `[[`, not `[`. You might have spotted that I used `[[` in all my for loops: I think it’s better to use `[[` even for atomic vectors because it makes it clear that I want to work with a single element.
 
 ### Looping Patterns
+
+There are three basic ways to loop over a vector: 
+
+1. looping over the numeric indices with for `(i in seq_along(xs))`, and extracting the value with `x[[i]]`
+
+2. Loop over the elements: `for (x in xs)`. This is most useful if you only care about side-effects, like plotting or saving a file, because it’s difficult to save the output efficiently.
+
+3. Loop over the names: `for (nm in names(xs))`. This gives you name, which you can use to access the value with `x[[nm]]`. This is useful if you want to use the name in a plot title or a file name. If you’re creating named output, make sure to name the results vector like so:
+
+```{r}
+results <- vector("list", length(x))
+names(results) <- names(x)
+```
+
+Iteration over the numeric indices is the most general form, because given the position you can extract both the name and the value:
+
+```{r}
+for (i in seq_along(x)) {
+  name <- names(x)[[i]]
+  value <- x[[i]]
+}
+```
+
