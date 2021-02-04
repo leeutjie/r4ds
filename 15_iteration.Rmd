@@ -168,3 +168,214 @@ for (i in seq_along(x)) {
 }
 ```
 
+### Unknown output length
+
+Sometimes you might not know how long the output will be. For example, imagine you want to simulate some random vectors of random lengths. You might be tempted to solve this problem by progressively growing the vector:
+
+```{r}
+means <- c(0, 1, 2)
+
+output <- double()
+for (i in seq_along(means)) {
+  n <- sample(100, 1)
+  output <- c(output, rnorm(n, means[[i]]))
+}
+str(output)
+```
+
+But this is not very efficient because in each iteration, R has to copy all the data from the previous iterations. In technical terms you get “quadratic” $(O(n^2))$ behaviour which means that a loop with three times as many elements would take nine $(3^2)$ times as long to run.
+
+A better solution to save the results in a list, and then combine into a single vector after the loop is done:
+
+```{r}
+out <- vector("list", length(means))
+for (i in seq_along(means)) {
+  n <- sample(100, 1)
+  out[[i]] <- rnorm(n, means[[i]])
+}
+str(out)
+
+str(unlist(out))
+```
+
+Here I’ve used `unlist()` to flatten a list of vectors into a single vector. A stricter option is to use `purrr::flatten_dbl()` — it will throw an error if the input isn’t a list of doubles.
+
+This pattern occurs in other places too:
+
+1. You might be generating a long string. Instead of `paste()`ing together each iteration with the previous, save the output in a character vector and then combine that vector into a single string with `paste(output, collapse = "")`.
+
+2. You might be generating a big data frame. Instead of sequentially `rbind()`ing in each iteration, save the output in a list, then use `dplyr::bind_rows(output)` to combine the output into a single data frame.
+
+Watch out for this pattern. Whenever you see it, switch to a more complex result object, and then combine in one step at the end.
+
+### Unknown sequence length
+
+Sometimes you don’t even know how long the input sequence should run for. This is common when doing simulations. For example, you might want to loop until you get three heads in a row. You can’t do that sort of iteration with the for loop. Instead, you can use a while loop. A while loop is simpler than for loop because it only has two components, a condition and a body:
+
+```{r eval=FALSE}
+while (condition) {
+  # body
+}
+```
+
+A while loop is also more general than a for loop, because you can rewrite any for loop as a while loop, but you can’t rewrite every while loop as a for loop:
+
+```{r eval=FALSE}
+for (i in seq_along(x)) {
+  # body
+}
+
+# Equivalent to
+i <- 1
+while (i <= length(x)) {
+  # body
+  i <- i + 1 
+}
+```
+
+Here’s how we could use a while loop to find how many tries it takes to get three heads in a row:
+
+```{r}
+flip <- function() sample(c("T", "H"), 1)
+
+flips <- 0
+nheads <- 0
+
+while (nheads < 3) {
+  if (flip() == "H") {
+    nheads <- nheads + 1
+  } else {
+    nheads <- 0
+  }
+  flips <- flips + 1
+}
+flips
+```
+
+## For loops vs. functionals
+
+For loops are not as important in R as they are in other languages because R is a functional programming language. This means that it’s possible to wrap up for loops in a function, and call that function instead of using the for loop directly.
+
+To see why this is important, consider (again) this simple data frame:
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+```
+
+Imagine you want to compute the mean of every column. You could do that with a for loop:
+
+```{r}
+output <- vector("double", length(df))
+for (i in seq_along(df)) {
+  output[[i]] <- mean(df[[i]])
+}
+output
+```
+
+You realise that you’re going to want to compute the means of every column pretty frequently, so you extract it out into a function:
+
+```{r}
+col_mean <- function(df) {
+  output <- vector("double", length(df))
+  for (i in seq_along(df)) {
+    output[i] <- mean(df[[i]])
+  }
+  output
+}
+```
+
+But then you think it’d also be helpful to be able to compute the median, and the standard deviation, so you copy and paste your `col_mean()` function and replace the `mean()` with `median()` and `sd()`:
+
+```{r}
+col_median <- function(df) {
+  output <- vector("double", length(df))
+  for (i in seq_along(df)) {
+    output[i] <- median(df[[i]])
+  }
+  output
+}
+
+col_sd <- function(df) {
+  output <- vector("double", length(df))
+  for (i in seq_along(df)) {
+    output[i] <- sd(df[[i]])
+  }
+  output
+}
+```
+
+Uh oh! You’ve copied-and-pasted this code twice, so it’s time to think about how to generalise it. Notice that most of this code is for-loop boilerplate and it’s hard to see the one thing (`mean()`, `median()`, `sd()`) that is different between the functions.
+
+```{r}
+f1 <- function(x) abs(x - mean(x)) ^ 1
+f2 <- function(x) abs(x - mean(x)) ^ 2
+f3 <- function(x) abs(x - mean(x)) ^ 3
+```
+
+Hopefully, you’d notice that there’s a lot of duplication, and extract it out into an additional argument:
+
+```{r}
+f <- function(x, i) abs(x - mean(x)) ^ i
+```
+
+You’ve reduced the chance of bugs (because you now have 1/3 of the original code), and made it easy to generalise to new situations.
+
+We can do exactly the same thing with `col_mean()`, `col_median()` and `col_sd()` by adding an argument that supplies the function to apply to each column:
+
+```{r}
+col_summary <- function(df, fun) {
+  out <- vector("double", length(df))
+  for (i in seq_along(df)) {
+    out[i] <- fun(df[[i]])
+  }
+  out
+}
+
+col_summary(df, median)
+
+col_summary(df, mean)
+```
+
+The idea of passing a function to another function is an extremely powerful idea, and it’s one of the behaviours that makes R a functional programming language. It might take you a while to wrap your head around the idea, but it’s worth the investment.
+
+Let's turn our attention to **purrr**. The goal of using purrr functions instead of for loops is to allow you to break common list manipulation challenges into independent pieces:
+
+1. How can you solve the problem for a single element of the list? Once you’ve solved that problem, purrr takes care of generalising your solution to every element in the list.
+
+2. If you’re solving a complex problem, how can you break it down into bite-sized pieces that allow you to advance one small step towards a solution? With purrr, you get lots of small pieces that you can compose together with the pipe.
+
+This structure makes it easier to solve new problems. It also makes it easier to understand your solutions to old problems when you re-read your old code.
+
+## The map functions
+
+The pattern of looping over a vector, doing something to each element and saving the results is so common that the purrr package provides a family of functions to do it for you. There is one function for each type of output:
+
+
++ `map()` makes a list.
+
++ `map_lgl()` makes a logical vector.
+
++ `map_int()` makes an integer vector.
+
++ `map_dbl()` makes a double vector.
+
++ `map_chr()` makes a character vector.
+
+Each function takes a vector as input, applies a function to each piece, and then returns a new vector that’s the same length (and has the same names) as the input. The type of the vector is determined by the suffix to the map function.
+
+Some people will tell you to avoid for loops because they are slow. They’re wrong! (Well at least they’re rather out of date, as for loops haven’t been slow for many years.) The chief benefits of using functions like `map()` is not speed, but clarity: they make your code easier to write and to read.
+
+We can use these functions to perform the same computations as the last for loop. Those summary functions returned doubles, so we need to use `map_dbl()`:
+```{r}
+map_dbl(df, mean)
+map_dbl(df, median)
+map_dbl(df, sd)
+```
+
+
+
