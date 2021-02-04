@@ -104,3 +104,44 @@ There are four variations on the basic theme of the for loop:
 
 ### Modifying an existing object
 
+Sometimes you want to use a for loop to modify an existing object. Let's say We wanted to rescale every column in a data frame:
+
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+df$a <- rescale01(df$a)
+df$b <- rescale01(df$b)
+df$c <- rescale01(df$c)
+df$d <- rescale01(df$d)
+```
+
+To solve this with a for loop we again think about the three components:
+
+1. **Output**: we already have the output — it’s the same as the input!
+
+2. **Sequence**: we can think about a data frame as a list of columns, so we can iterate over each column with `seq_along(df)`.
+
+3. Body: apply **rescale01()**.
+
+This gives us:
+
+```{r}
+for (i in seq_along(df)) {
+  df[[i]] <- rescale01(df[[i]])
+}
+```
+
+Typically you’ll be modifying a list or data frame with this sort of loop, so remember to use `[[`, not `[`. You might have spotted that I used `[[` in all my for loops: I think it’s better to use `[[` even for atomic vectors because it makes it clear that I want to work with a single element.
+
+### Looping Patterns
