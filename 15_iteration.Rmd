@@ -722,4 +722,40 @@ x %>%
   tail_while(~ . > 5)
 ```
 
- 
+### Reduce and accumulate
+
+Sometimes you have a complex list that you want to reduce to a simple list by repeatedly applying a function that reduces a pair to a singleton. This is useful if you want to apply a two-table dplyr verb to multiple tables. For example, you might have a list of data frames, and you want to reduce to a single data frame by joining the elements together:
+
+```{r}
+dfs <- list(
+  age = tibble(name = "John", age = 30),
+  sex = tibble(name = c("John", "Mary"), sex = c("M", "F")),
+  trt = tibble(name = "Mary", treatment = "A")
+)
+
+dfs %>% reduce(full_join)
+```
+
+Or maybe you have a list of vectors, and want to find the intersection:
+
+```{r}
+vs <- list(
+  c(1, 3, 5, 6, 10),
+  c(1, 2, 3, 7, 8, 10),
+  c(1, 2, 3, 4, 8, 9, 10)
+)
+
+vs %>% reduce(intersect)
+```
+
+`reduce()` takes a “binary” function (i.e. a function with two primary inputs), and applies it repeatedly to a list until there is only a single element left.
+
+`accumulate()` is similar but it keeps all the interim results. You could use it to implement a cumulative sum:
+
+```{r}
+x <- sample(10)
+x
+
+x %>% accumulate(`+`)
+```
+
