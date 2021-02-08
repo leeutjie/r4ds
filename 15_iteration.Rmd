@@ -673,7 +673,7 @@ Purrr provides a number of other functions that abstract over other types of for
 
 ### Predicate functions
 
-A number of functions work with predicate functions that return either a single `TRUE` or `FALSE`.
+A number of functions work with **predicate** functions that return either a single `TRUE` or `FALSE`.
 
 `keep()` and `discard()` keep elements of the input where the predicate is `TRUE` or `FALSE` respectively:
 
@@ -689,6 +689,37 @@ iris %>%
 
 `some()` and `every()` determine if the predicate is true for any or for all of the elements.
 
+```{r}
+x <- list(1:5, letters, list(10))
 
+x %>% 
+  some(is_character)
 
+x %>% 
+  every(is_vector)
+```
 
+`detect()` finds the first element where the predicate is true; `detect_index()` returns its position.
+
+```{r}
+x <- sample(10)
+x
+
+x %>% 
+  detect(~ . > 5)
+
+x %>% 
+  detect_index(~ . > 5)
+```
+
+`head_while()` and `tail_while()` take elements from the start or end of a vector while a predicate is true:
+
+```{r}
+x %>% 
+  head_while(~ . > 5)
+
+x %>% 
+  tail_while(~ . > 5)
+```
+
+ 
